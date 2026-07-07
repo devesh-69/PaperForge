@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.DS_Store
+
+# Ignore specific files and folders requested by user
+/docs
+*.md
+!README.md
+My Rough Idea at Initail Stage.txt
+.gemini/
+agent.md
+PROGRESS.md
+report.md
