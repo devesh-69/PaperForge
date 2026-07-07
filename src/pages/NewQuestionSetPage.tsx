@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
@@ -95,7 +95,7 @@ export const NewQuestionSetPage: React.FC = () => {
               <div className="alert alert-warning py-2 px-3" role="alert">
                 <i className="bi bi-exclamation-triangle me-2"></i>
                 No templates saved yet.{' '}
-                <a href="/templates/new" className="alert-link">Create one first</a>.
+                <Link to="/templates/new" className="alert-link">Create one first</Link>.
               </div>
             </div>
           ) : (
