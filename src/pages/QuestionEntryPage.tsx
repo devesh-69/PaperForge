@@ -2,6 +2,7 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { saveAs } from 'file-saver';
+import { Modal, Button } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 import { db } from '../db/db';
 import { updateQuestionSet } from '../db/questionSetRepository';
@@ -38,6 +39,8 @@ export const QuestionEntryPage: React.FC = () => {
   const [entryMode, setEntryMode] = useState<'single' | 'bulk'>('single');
   const [exporting, setExporting] = useState(false);
   const [showErrorPanel, setShowErrorPanel] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const validationResult = useMemo(() => {
     if (!questionSet || !template) return null;
@@ -93,23 +96,32 @@ export const QuestionEntryPage: React.FC = () => {
     await updateQuestionSet(updatedSet);
   }, [questionSet, activeQNumber]);
 
-  const handleDeleteQuestion = useCallback(async (qNumber: number) => {
-    if (!window.confirm(`Are you sure you want to delete Question ${qNumber}?`)) return;
-    if (!questionSet) return;
-    // Remove the question and renumber the rest sequentially
-    const remaining = questionSet.questions
-      .filter((q) => q.qNumber !== qNumber)
-      .sort((a, b) => a.qNumber - b.qNumber)
-      .map((q, idx) => ({ ...q, qNumber: idx + 1 }));
-    const updatedSet = { ...questionSet, questions: remaining };
-    await updateQuestionSet(updatedSet);
-    // If the deleted question was active, move to previous or first
-    if (activeQNumber === qNumber) {
-      setActiveQNumber(Math.max(1, qNumber - 1));
-    } else if (activeQNumber > qNumber) {
-      setActiveQNumber(activeQNumber - 1);
+  const handleDeleteClick = useCallback((qNumber: number) => {
+    setDeleteTarget(qNumber);
+  }, []);
+
+  const handleConfirmDelete = async () => {
+    if (deleteTarget === null || !questionSet) return;
+    setDeleting(true);
+    try {
+      const qNumber = deleteTarget;
+      const remaining = questionSet.questions
+        .filter((q) => q.qNumber !== qNumber)
+        .sort((a, b) => a.qNumber - b.qNumber)
+        .map((q, idx) => ({ ...q, qNumber: idx + 1 }));
+      const updatedSet = { ...questionSet, questions: remaining };
+      await updateQuestionSet(updatedSet);
+      if (activeQNumber === qNumber) {
+        setActiveQNumber(Math.max(1, qNumber - 1));
+      } else if (activeQNumber > qNumber) {
+        setActiveQNumber(activeQNumber - 1);
+      }
+      toast.success(`Question ${qNumber} deleted`);
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
-  }, [questionSet, activeQNumber]);
+  };
 
   const handleNavigateToQuestion = useCallback((qNumber: number) => {
     setEntryMode('single');
@@ -214,11 +226,11 @@ export const QuestionEntryPage: React.FC = () => {
             </div>
 
             <QuestionSidebarList
-              questions={questions}
+              questions={questionSet.questions}
               activeQNumber={activeQNumber}
-              onSelect={setActiveQNumber}
+              onSelect={handleNavigateToQuestion}
+              onDelete={handleDeleteClick}
               onReorder={handleReorder}
-              onDelete={handleDeleteQuestion}
             />
           </aside>
         )}
@@ -329,7 +341,7 @@ export const QuestionEntryPage: React.FC = () => {
                 await handleSave(updatedSet);
               }}
               onNavigateToQuestion={setActiveQNumber}
-              onDelete={handleDeleteQuestion}
+              onDelete={handleDeleteClick}
             />
           ) : (
             <QuestionGrid
@@ -341,6 +353,41 @@ export const QuestionEntryPage: React.FC = () => {
           )}
         </main>
       </div>
+
+      {/* ── Delete Confirmation Modal ───────────────────────────── */}
+      <Modal show={deleteTarget !== null} onHide={() => setDeleteTarget(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Question</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-1">
+            Are you sure you want to delete Question{' '}
+            <strong>{deleteTarget}</strong>?
+          </p>
+          <p className="text-muted small mb-0">
+            This action cannot be undone. All subsequent questions will be renumbered.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            style={{ background: '#ef4444', borderColor: '#ef4444', fontWeight: 600 }}
+            onClick={handleConfirmDelete}
+            disabled={deleting}
+          >
+            {deleting ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Deleting...
+              </>
+            ) : (
+              'Delete'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -6,7 +6,7 @@ import type { Question, Template, RichContent } from '../../types';
 import { buildGridColumns } from './gridColumns';
 import { RichCellEditorModal } from './RichCellEditorModal';
 import { parsePasteData, applyPasteToGrid } from './pasteHandler';
-import { buildEmptyQuestion, getOptionsCount, findBlock, isFieldLocked } from '../../utils/resolveLockedFields';
+import { buildEmptyQuestion, getOptionsCount, findBlock, isFieldLocked, hasQuestionContent } from '../../utils/resolveLockedFields';
 
 interface Props {
   template: Template;
@@ -36,8 +36,9 @@ export const QuestionGrid: React.FC<Props> = ({
   // Only questions with actual content are persisted.
   const displayRows = useMemo(() => {
     const maxQ = template.maxQuestions ?? 100;
-    // Show saved questions + empty rows up to max, minimum 5 visible rows
-    const displayCount = Math.min(Math.max(questions.length + 3, 5), maxQ);
+    const maxSavedQ = questions.reduce((max, q) => Math.max(max, q.qNumber), 0);
+    // Show exactly the saved questions, or 1 empty row if completely empty so the user can paste
+    const displayCount = Math.min(Math.max(maxSavedQ, 1), maxQ);
     const rows: Question[] = [];
     for (let i = 1; i <= displayCount; i++) {
       const existing = questions.find((q) => q.qNumber === i);
@@ -46,38 +47,13 @@ export const QuestionGrid: React.FC<Props> = ({
     return rows;
   }, [questions, template, questionSetId]);
 
-  // A question has real user content only if the user actually typed something.
-  // Template-locked fields (subject, topic) pre-filled by buildEmptyQuestion do NOT count.
-  const hasContent = useCallback((q: Question): boolean => {
-    const hasHtml = (rc: RichContent | undefined) =>
-      !!rc?.html && rc.html.trim() !== '' && rc.html !== '<p></p>' && rc.html !== '<p><br></p>';
-    if (hasHtml(q.questionText)) return true;
-    if (q.options?.some((o) => hasHtml(o))) return true;
-    if (q.rightAnswer && q.rightAnswer.trim() !== '') return true;
-    if (hasHtml(q.explanation)) return true;
-
-    // Check if user has changed template-provided defaults
-    const block = findBlock(template, q.qNumber);
-    if (block) {
-      if (!isFieldLocked(block, 'subject') && q.subject !== block.subject) return true;
-      if (!isFieldLocked(block, 'topic') && q.topic !== block.topic && q.topic !== '') return true;
-      if (!isFieldLocked(block, 'correctMarks') && q.correctMarks !== block.correctMarks) return true;
-      if (!isFieldLocked(block, 'negativeMarks') && q.negativeMarks !== block.negativeMarks) return true;
-      if (!isFieldLocked(block, 'tags') && (q.tags?.length || 0) > 0) return true;
-      if (!isFieldLocked(block, 'difficulty') && q.difficulty !== block.difficulty) return true;
-    } else {
-      if (q.subject || q.topic || (q.tags?.length || 0) > 0) return true;
-    }
-    return false;
-  }, [template]);
-
   // Persist only questions with real content
   const persistRows = useCallback(
     async (allRows: Question[]) => {
-      const toSave = allRows.filter(hasContent);
+      const toSave = allRows.filter((q) => hasQuestionContent(q, template));
       await onChange(toSave);
     },
-    [onChange, hasContent]
+    [onChange, template]
   );
 
   const handleRowsChange = useCallback(

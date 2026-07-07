@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Template, SubjectBlock } from '../../types';
 import { SubjectBlockEditor } from './SubjectBlockEditor';
+import { TagInput } from './TagInput';
 import { FieldLockPreview } from './FieldLockPreview';
 
 interface Props {
@@ -61,7 +62,7 @@ export const TemplateForm: React.FC<Props> = ({ initial, onSave, onCancel }) => 
   const isEdit = !!initial;
 
   const [name, setName] = useState(initial?.name ?? '');
-  const [tagsInput, setTagsInput] = useState((initial?.tags ?? []).join(', '));
+  const [tagsInput, setTagsInput] = useState<string[]>(initial?.tags ?? []);
   const [maxQEnabled, setMaxQEnabled] = useState(initial?.maxQuestions !== null && initial?.maxQuestions !== undefined);
   const [maxQuestions, setMaxQuestions] = useState<number>(initial?.maxQuestions ?? 50);
   const [blocks, setBlocks] = useState<SubjectBlock[]>(
@@ -88,9 +89,7 @@ export const TemplateForm: React.FC<Props> = ({ initial, onSave, onCancel }) => 
       setErrors(newErrors);
       if (Object.keys(newErrors).length > 0 || !blocksValid) return;
 
-      const tags = tagsInput
-        ? tagsInput.split(',').map((t) => t.trim()).filter(Boolean)
-        : [];
+      const tags = tagsInput;
 
       const now = new Date().toISOString();
       const template: Template = {
@@ -142,15 +141,9 @@ export const TemplateForm: React.FC<Props> = ({ initial, onSave, onCancel }) => 
 
               <div className="mb-3">
                 <label className="form-label">
-                  Tags <span className="text-muted fw-normal">(comma-separated)</span>
+                  Tags
                 </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="e.g. JEE, Physics, Chemistry"
-                  value={tagsInput}
-                  onChange={(e) => setTagsInput(e.target.value)}
-                />
+                <TagInput tags={tagsInput} onChange={setTagsInput} />
                 <div className="form-text">
                   Tags help you find and filter templates later.
                 </div>

@@ -145,8 +145,8 @@ export const SubjectBlockEditor: React.FC<Props> = ({ blocks, onChange, errors }
 
               {/* Per-block tags */}
               <div className="col-12 col-md-6">
-                <label className="form-label">
-                  Block Tags <span className="text-muted fw-normal">(optional, comma-separated)</span>
+                <label className="form-label mb-1">
+                  Block Tags <span className="text-muted fw-normal">(optional)</span>
                 </label>
                 <TagInput
                   tags={block.tags ?? []}

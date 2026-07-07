@@ -61,18 +61,23 @@ function extractNodes(element: Element | ChildNode): ParsedNode[] {
   return nodes;
 }
 
-export function richContentToDocxParagraphs(content: RichContent): Paragraph[] {
+export function richContentToDocxParagraphs(content: RichContent, prefixLabel?: string): Paragraph[] {
   const html = content.html;
-  if (!html || html === '<p></p>') return [new Paragraph({ children: [new TextRun('')] })];
+  const prefixRuns = prefixLabel ? [new TextRun({ text: `${prefixLabel} `, bold: true })] : [];
+
+  if (!html || html === '<p></p>') return [new Paragraph({ children: [...prefixRuns, new TextRun('')] })];
 
   const div = document.createElement('div');
   div.innerHTML = html;
 
   const paragraphs: Paragraph[] = [];
 
+  let isFirstPara = true;
+
   const processBlockElement = (el: Element) => {
     const nodes = extractNodes(el);
-    const runs: (TextRun | ImageRun)[] = [];
+    const runs: (TextRun | ImageRun)[] = isFirstPara ? [...prefixRuns] : [];
+    isFirstPara = false;
 
     nodes.forEach((node) => {
       if (node.type === 'text' && node.text) {
@@ -132,6 +137,11 @@ export function richContentToDocxParagraphs(content: RichContent): Paragraph[] {
           const runs: TextRun[] = liNodes
             .filter((n) => n.type === 'text' && n.text)
             .map((n) => new TextRun({ text: `• ${n.text}`, bold: n.bold, italics: n.italic }));
+          
+          if (isFirstPara && prefixRuns.length > 0) {
+            runs.unshift(...prefixRuns as TextRun[]);
+            isFirstPara = false;
+          }
           if (runs.length > 0) paragraphs.push(new Paragraph({ children: runs }));
         });
       } else {
@@ -168,13 +178,8 @@ function labelLine(label: string, value: string): Paragraph {
 }
 
 function labelRichParagraphs(label: string, content: RichContent): Paragraph[] {
-  // Label on its own bold line, followed by content paragraphs
-  const labelPara = new Paragraph({
-    children: [new TextRun({ text: label, bold: true })],
-    spacing: { after: 40 },
-  });
-  const contentParas = richContentToDocxParagraphs(content);
-  return [labelPara, ...contentParas];
+  // Label on the same line as the first paragraph of content
+  return richContentToDocxParagraphs(content, label);
 }
 
 function questionToDocxChildren(q: Question): Paragraph[] {

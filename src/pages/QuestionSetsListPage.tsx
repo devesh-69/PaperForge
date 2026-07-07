@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { saveAs } from 'file-saver';
+import { Modal, Button } from 'react-bootstrap';
 import toast from 'react-hot-toast';
 import { db } from '../db/db';
 import { deleteQuestionSet } from '../db/questionSetRepository';
@@ -16,11 +17,22 @@ export const QuestionSetsListPage: React.FC = () => {
   const templatesArray = useLiveQuery(() => db.templates.toArray());
   const templatesMap = new Map(templatesArray?.map((t) => [t.id, t]) || []);
 
-  const handleDelete = async (id: string, title: string) => {
-    // Note: React Bootstrap modal would be ideal here per Phase 8 audit,
-    // but using native confirm just to get logic flowing; will need to fix in audit.
-    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
-      await deleteQuestionSet(id);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteClick = (id: string, title: string) => {
+    setDeleteTarget({ id, title });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteQuestionSet(deleteTarget.id);
+      toast.success('Question set deleted');
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
@@ -129,9 +141,10 @@ export const QuestionSetsListPage: React.FC = () => {
                       )}
                     </button>
                     <button
-                      className="btn-icon danger"
-                      title="Delete Question Set"
-                      onClick={() => handleDelete(qs.id, qs.title)}
+                      type="button"
+                      className="btn-icon text-danger"
+                      title="Delete"
+                      onClick={() => handleDeleteClick(qs.id, qs.title)}
                     >
                       <i className="bi bi-trash3"></i>
                     </button>
@@ -142,6 +155,41 @@ export const QuestionSetsListPage: React.FC = () => {
           })}
         </div>
       )}
+
+      {/* ── Delete Confirmation Modal ───────────────────────────── */}
+      <Modal show={!!deleteTarget} onHide={() => setDeleteTarget(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Question Set</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-1">
+            Are you sure you want to delete{' '}
+            <strong>{deleteTarget?.title}</strong>?
+          </p>
+          <p className="text-muted small mb-0">
+            This action cannot be undone. All questions in this set will be permanently lost.
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="light" onClick={() => setDeleteTarget(null)} disabled={deleting}>
+            Cancel
+          </Button>
+          <Button
+            style={{ background: '#ef4444', borderColor: '#ef4444', fontWeight: 600 }}
+            onClick={handleConfirmDelete}
+            disabled={deleting}
+          >
+            {deleting ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Deleting...
+              </>
+            ) : (
+              'Delete'
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

@@ -16,6 +16,7 @@ import {
   isFieldLocked,
   buildEmptyQuestion,
   getOptionsCount,
+  hasQuestionContent,
 } from '../../utils/resolveLockedFields';
 import { TagInput } from '../templateBuilder/TagInput';
 
@@ -97,9 +98,16 @@ export const QuestionForm: React.FC<Props> = ({
   const saveQuestion = async (andNext = false) => {
     setSaving(true);
     try {
-      const updatedQuestions = questionSet.questions.some((q) => q.qNumber === currentQ.qNumber)
-        ? questionSet.questions.map((q) => (q.qNumber === currentQ.qNumber ? currentQ : q))
-        : [...questionSet.questions, currentQ].sort((a, b) => a.qNumber - b.qNumber);
+      let updatedQuestions = questionSet.questions;
+
+      if (hasQuestionContent(currentQ, template)) {
+        updatedQuestions = questionSet.questions.some((q) => q.qNumber === currentQ.qNumber)
+          ? questionSet.questions.map((q) => (q.qNumber === currentQ.qNumber ? currentQ : q))
+          : [...questionSet.questions, currentQ].sort((a, b) => a.qNumber - b.qNumber);
+      } else {
+        // If it was already in the DB but they emptied it, remove it
+        updatedQuestions = questionSet.questions.filter((q) => q.qNumber !== currentQ.qNumber);
+      }
 
       const updatedSet: QuestionSet = { ...questionSet, questions: updatedQuestions };
       await onSave(updatedSet);
@@ -384,16 +392,17 @@ export const QuestionForm: React.FC<Props> = ({
           {saving ? <span className="spinner-border spinner-border-sm me-1" role="status"></span> : <i className="bi bi-floppy"></i>}
           Save
         </button>
-        <button
-          type="button"
-          className="btn-orange"
-          onClick={() => saveQuestion(true)}
-          disabled={saving || atMaxQuestions}
-          title={atMaxQuestions ? `Max questions (${maxQ}) reached` : undefined}
-        >
-          <i className="bi bi-arrow-right-circle"></i>
-          Save &amp; Next Question
-        </button>
+        {!atMaxQuestions && (
+          <button
+            type="button"
+            className="btn-orange"
+            onClick={() => saveQuestion(true)}
+            disabled={saving}
+          >
+            <i className="bi bi-arrow-right-circle"></i>
+            Save &amp; Next Question
+          </button>
+        )}
         {atMaxQuestions && (
           <span className="align-self-center text-muted small">
             <i className="bi bi-info-circle me-1"></i>

@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 import { db } from '../db/db';
 import { createQuestionSet } from '../db/questionSetRepository';
 import type { QuestionSet } from '../types';
@@ -43,6 +44,7 @@ export const NewQuestionSetPage: React.FC = () => {
         questions: [],
       };
       await createQuestionSet(qs);
+      toast.success('Question set created successfully!');
       navigate(`/question-set/${qs.id}`);
     } finally {
       setCreating(false);

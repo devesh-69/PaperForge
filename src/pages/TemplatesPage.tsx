@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Modal, Button } from 'react-bootstrap';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 import { db } from '../db/db';
 import { deleteTemplate, createTemplate } from '../db/templateRepository';
 import type { Template } from '../types';
@@ -51,6 +52,7 @@ export const TemplatesPage: React.FC = () => {
       maxQuestions: copy.maxQuestions,
       subjectBlocks: copy.subjectBlocks,
     });
+    toast.success('Template duplicated');
   };
 
   const handleConfirmDelete = async () => {
@@ -58,6 +60,7 @@ export const TemplatesPage: React.FC = () => {
     setDeleting(true);
     try {
       await deleteTemplate(deleteTarget.id);
+      toast.success('Template deleted');
     } finally {
       setDeleting(false);
       setDeleteTarget(null);
