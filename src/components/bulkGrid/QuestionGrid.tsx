@@ -6,7 +6,7 @@ import type { Question, Template, RichContent } from '../../types';
 import { buildGridColumns } from './gridColumns';
 import { RichCellEditorModal } from './RichCellEditorModal';
 import { parsePasteData, applyPasteToGrid } from './pasteHandler';
-import { buildEmptyQuestion, getOptionsCount, findBlock, isFieldLocked, hasQuestionContent } from '../../utils/resolveLockedFields';
+import { buildEmptyQuestion, getOptionsCount, findBlock, hasQuestionContent } from '../../utils/resolveLockedFields';
 
 interface Props {
   template: Template;
