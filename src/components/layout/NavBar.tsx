@@ -5,9 +5,9 @@ export const NavBar: React.FC = () => {
   return (
     <nav className="navbar navbar-expand-lg app-navbar">
       <div className="container">
-        <Link className="navbar-brand" to="/">
-          <span className="brand-dot" />
-          PaperForge
+        <Link className="navbar-brand d-flex align-items-center gap-2" to="/">
+          <img src="/paperforge-64x64.ico" alt="PaperForge Logo" width="24" height="24" />
+          <span>PaperForge</span>
         </Link>
         <button
           className="navbar-toggler border-0"
