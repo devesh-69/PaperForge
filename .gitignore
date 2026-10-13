@@ -7,6 +7,7 @@ dist/
 
 # Ignore specific files and folders requested by user
 /docs
+design-demo/
 *.md
 !README.md
 My Rough Idea at Initail Stage.txt
