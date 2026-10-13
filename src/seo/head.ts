@@ -67,7 +67,7 @@ export function buildHead(page: PublicPage): HeadData {
     { tag: 'meta', attrs: { property: 'og:site_name', content: SITE_NAME } },
     { tag: 'meta', attrs: { property: 'og:title', content: page.title } },
     { tag: 'meta', attrs: { property: 'og:description', content: page.description } },
-    { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary' } },
+    { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' } },
     { tag: 'meta', attrs: { name: 'twitter:title', content: page.title } },
     { tag: 'meta', attrs: { name: 'twitter:description', content: page.description } },
   ];

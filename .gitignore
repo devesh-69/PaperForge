@@ -16,3 +16,4 @@ agent.md
 PROGRESS.md
 report.md
 !.env.production.example
+tsconfig.tsbuildinfo

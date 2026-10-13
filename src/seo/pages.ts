@@ -224,7 +224,7 @@ export const PUBLIC_PAGES: PublicPage[] = [
         bullets: [
           'Clearing browser data removes your work. Download a backup from Backup & restore to keep a copy.',
           'Your work is not shared between computers or browsers unless you restore a backup there.',
-          'The Inter typeface is loaded from Google Fonts, which can see that a page was requested, as with any website.',
+          'The Inter typeface is self-hosted and served directly from this site. No fonts are loaded from Google Fonts or any other third party.',
         ],
       },
     ],

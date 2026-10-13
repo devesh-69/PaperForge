@@ -2,7 +2,23 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/home",                         "destination": "/app.html" },
+    { "source": "/templates",                    "destination": "/app.html" },
+    { "source": "/templates/new",                "destination": "/app.html" },
+    { "source": "/templates/edit/:id",           "destination": "/app.html" },
+    { "source": "/question-sets",                "destination": "/app.html" },
+    { "source": "/new-question-set",             "destination": "/app.html" },
+    { "source": "/question-set/:id",             "destination": "/app.html" },
+    { "source": "/question-set/:id/import",      "destination": "/app.html" },
+    { "source": "/letterheads",                  "destination": "/app.html" },
+    { "source": "/letterheads/new",              "destination": "/app.html" },
+    { "source": "/letterheads/edit/:id",         "destination": "/app.html" },
+    { "source": "/letters/:id",                  "destination": "/app.html" },
+    { "source": "/exam-papers",                  "destination": "/app.html" },
+    { "source": "/exam-papers/new",              "destination": "/app.html" },
+    { "source": "/exam-papers/edit/:id",         "destination": "/app.html" },
+    { "source": "/papers/:id",                   "destination": "/app.html" },
+    { "source": "/backup",                       "destination": "/app.html" }
   ],
   "headers": [
     {
