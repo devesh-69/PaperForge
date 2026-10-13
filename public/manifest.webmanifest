@@ -1,0 +1,13 @@
+{
+  "name": "PaperForge",
+  "short_name": "PaperForge",
+  "description": "Question papers, letterheads and exam papers in your browser. Your data stays on your computer.",
+  "start_url": "/home",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "icons": [
+    { "src": "/paperforge-1024x1024.webp", "sizes": "1024x1024", "type": "image/webp", "purpose": "any" }
+  ]
+}

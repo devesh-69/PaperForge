@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PaperForge – UI concept demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+/* ───────────── Design tokens (same theme: orange + black on white) ───────────── */
+:root{
+  --orange:#f97316; --orange-700:#c2410c; --orange-100:#ffedd5; --orange-50:#fff7ed;
+  --bg:#f6f6f7; --surface:#ffffff; --text:#111827; --muted:#5b6472; --line:#e5e7eb; --line-strong:#d1d5db;
+  --g50:#f9fafb; --g100:#f3f4f6; --g200:#e5e7eb;
+  --strong-bg:#0a0a0a; --strong-fg:#ffffff;          /* black pills / dark buttons */
+  --ok:#15803d; --ok-bg:#dcfce7; --warn:#a16207; --warn-bg:#fef9c3; --err:#b91c1c; --err-bg:#fee2e2; --info:#1d4ed8; --info-bg:#dbeafe;
+  --r:6px; --r-lg:8px; --side:264px; --top:60px;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.05);
+  --shadow-md:0 6px 18px rgba(0,0,0,.08);
+  --shadow-lg:0 18px 48px rgba(0,0,0,.18);
+  --focus:0 0 0 3px rgba(249,115,22,.4);
+  color-scheme:light;
+}
+[data-theme="dark"]{
+  --bg:#0c0c0d; --surface:#161618; --text:#f3f4f6; --muted:#a1a8b3; --line:#2a2a2f; --line-strong:#3a3a41;
+  --g50:#1b1b1e; --g100:#212125; --g200:#2a2a2f; --strong-bg:#f3f4f6; --strong-fg:#0a0a0a;
+  --orange-50:#2a1a0e; --orange-100:#3a2412; --orange-700:#fb923c;
+  --ok-bg:#12301c; --warn-bg:#33290a; --err-bg:#3a1414; --info-bg:#12233f; --ok:#4ade80; --warn:#facc15; --err:#f87171; --info:#93c5fd;
+  --shadow-lg:0 18px 48px rgba(0,0,0,.6); color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{margin:0;letter-spacing:-.02em;font-weight:700;color:var(--text)}
+p{margin:0}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:none;box-shadow:var(--focus);border-radius:8px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:8px;top:-60px;background:var(--strong-bg);color:var(--strong-fg);padding:.6rem 1rem;border-radius:8px;z-index:200}
+.skip:focus{top:8px}
+.muted{color:var(--muted)} .small{font-size:13px} .xs{font-size:12px} .mono{font-family:"JetBrains Mono",monospace}
+.accent{color:var(--orange)} .fw6{font-weight:600} .fw7{font-weight:700}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap} .grow{flex:1 1 auto} .right{margin-left:auto}
+.stack{display:grid;gap:12px} .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px} .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px} .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media(max-width:1100px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+
+/* ───────────── App shell ───────────── */
+.app{display:grid;grid-template-columns:var(--side) minmax(0,1fr);min-height:100vh}
+.app>div{min-width:0}
+.sidebar{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;background:var(--surface);border-right:1px solid var(--line);padding:16px 12px;overflow-y:auto;z-index:60}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 10px 16px;font-weight:800;font-size:18px;letter-spacing:-.02em;text-decoration:none}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--orange);display:grid;place-items:center;color:#fff;font-size:16px}
+.nav-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:16px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:6px;border:0;background:none;text-decoration:none;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;text-align:left;min-height:40px}
+.nav-item i{font-size:16px;width:18px;text-align:center}
+.nav-item:hover{background:var(--g100);color:var(--text)}
+.nav-item[aria-current="page"]{background:var(--strong-bg);color:var(--strong-fg);font-weight:600}
+.nav-item .count{margin-left:auto;font-size:12px;font-weight:600;background:var(--g100);color:var(--muted);padding:1px 7px;border-radius:4px}
+.nav-item[aria-current="page"] .count{background:rgba(255,255,255,.18);color:inherit}
+.side-foot{margin-top:auto;padding-top:16px}
+.meter{height:6px;background:var(--g200);border-radius:3px;overflow:hidden}.meter>i{display:block;height:100%;background:var(--orange)}
+.topbar{position:sticky;top:0;z-index:50;height:var(--top);display:flex;align-items:center;gap:12px;padding:0 24px;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.crumbs{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);min-width:0}
+.crumbs b{color:var(--text);font-weight:600;white-space:nowrap}
+.search-trigger{display:flex;align-items:center;gap:10px;min-width:260px;max-width:420px;flex:1 1 260px;height:38px;margin:0 auto;padding:0 12px;border:1px solid var(--line-strong);border-radius:6px;background:var(--g50);color:var(--muted);cursor:pointer;font-size:14px}
+.search-trigger kbd{margin-left:auto}
+kbd{font:500 11px "JetBrains Mono",monospace;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:6px;padding:1px 6px;background:var(--surface);color:var(--muted)}
+.hamburger{display:none}
+main{padding:24px 28px 56px;max-width:1360px;width:100%;margin:0 auto;outline:none}
+.page[hidden]{display:none}
+@media(max-width:991px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:0;top:0;width:var(--side);transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow-lg)}
+  body.drawer .sidebar{transform:none}
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:55}
+  .hamburger{display:inline-grid}
+  main{padding:20px 16px 64px}
+  .topbar{padding:0 12px}.crumbs{flex:1 1 auto}.hide-sm{display:none!important}
+  .search-trigger{flex:0 0 40px;min-width:40px;width:40px;padding:0;justify-content:center;margin:0 0 0 auto}.search-trigger kbd{display:none}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ───────────── Components ───────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:0 16px;border-radius:6px;border:1.5px solid var(--line-strong);background:var(--surface);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s,border-color .15s,transform .15s}
+.btn:hover{border-color:var(--text)}
+.btn-primary{background:var(--orange);border-color:var(--orange);color:#fff}.btn-primary:hover{background:var(--orange-700);border-color:var(--orange-700)}
+.btn-dark{background:var(--strong-bg);border-color:var(--strong-bg);color:var(--strong-fg)}.btn-dark:hover{opacity:.88}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--muted)}.btn-ghost:hover{background:var(--g100);color:var(--text);border-color:transparent}
+.btn-danger{border-color:var(--err);color:var(--err)}.btn-danger:hover{background:var(--err);color:#fff;border-color:var(--err)}
+.btn-sm{min-height:32px;padding:0 12px;font-size:13px;border-radius:8px}
+.btn-icon{width:38px;padding:0}.btn-sm.btn-icon{width:32px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;background:var(--g100);color:var(--muted);white-space:nowrap}
+.badge.ok{background:var(--ok-bg);color:var(--ok)} .badge.warn{background:var(--warn-bg);color:var(--warn)} .badge.err{background:var(--err-bg);color:var(--err)} .badge.info{background:var(--info-bg);color:var(--info)} .badge.orange{background:var(--orange-100);color:var(--orange-700)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);font-size:13px;font-weight:500;cursor:pointer;color:var(--muted)}
+.chip:hover{border-color:var(--text);color:var(--text)} .chip[aria-pressed="true"]{background:var(--strong-bg);color:var(--strong-fg);border-color:var(--strong-bg)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
+.card-pad{padding:16px} .card-head{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)} .card-head h3{font-size:15px}
+.card-head i.lead{color:var(--orange);font-size:18px}
+.page-head{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.page-head h1{font-size:28px;line-height:1.15}
+.page-head p{color:var(--muted);margin-top:4px}
+.field{display:grid;gap:6px}.field>label,.lbl{font-size:13px;font-weight:600;color:var(--text)}
+.hint{font-size:12.5px;color:var(--muted)}
+input[type=text],input[type=search],input[type=number],input[type=date],select,textarea,.input{width:100%;min-height:40px;padding:8px 12px;border:1.5px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--text);font:inherit;font-size:14px}
+textarea{resize:vertical;min-height:84px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--orange);box-shadow:var(--focus)}
+input[type=color]{width:40px;height:40px;padding:2px;border:1.5px solid var(--line-strong);border-radius:6px;background:var(--surface);cursor:pointer}
+.input-affix{position:relative}.input-affix i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}.input-affix input{padding-left:36px}
+.seg{display:inline-flex;border:1.5px solid var(--line-strong);border-radius:6px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;min-height:36px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--strong-bg);color:var(--strong-fg)}
+.switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:500}
+.switch input{appearance:none;width:40px;height:24px;border-radius:99px;background:var(--line-strong);position:relative;cursor:pointer;transition:background .15s;flex:none}
+.switch input::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .15s}
+.switch input:checked{background:var(--orange)}.switch input:checked::after{transform:translateX(16px)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 14px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button:hover{color:var(--text)} .tabs button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--orange)}
+.tabs .tcount{margin-left:6px;font-size:12px;background:var(--g100);padding:1px 7px;border-radius:4px}
+.panel[hidden]{display:none}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.toolbar .input-affix{flex:1 1 240px;max-width:340px}
+.toolbar select{width:auto;min-width:150px}
+.tbl-wrap{overflow-x:auto}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{position:sticky;top:0;text-align:left;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding:10px 16px;background:var(--g50);border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}.tbl tbody tr:hover{background:var(--g50)}
+.tbl .actions{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+.titlecell b{display:block;font-weight:600}.titlecell span{font-size:13px;color:var(--muted)}
+.empty{text-align:center;padding:56px 20px}.empty i{font-size:40px;color:var(--line-strong)}.empty h3{margin:10px 0 4px}
+.banner{display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:8px;background:var(--info-bg);color:var(--info);font-size:14px}
+.banner.warn{background:var(--warn-bg);color:var(--warn)} .banner.orange{background:var(--orange-50);color:var(--orange-700);border:1px solid var(--orange-100)}
+.banner button{margin-left:auto}
+.list{list-style:none;margin:0;padding:0}.list li{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--line)}.list li:last-child{border-bottom:0}
+.list li:hover{background:var(--g50)}
+.ico{width:36px;height:36px;border-radius:6px;display:grid;place-items:center;flex:none;background:var(--orange-100);color:var(--orange-700);font-size:17px}
+.ico.dark{background:var(--g100);color:var(--text)}
+.stat{padding:18px 20px}.stat b{display:block;font-size:28px;letter-spacing:-.03em;line-height:1.1;margin-top:4px}.stat span{font-size:13px;color:var(--muted);font-weight:500}
+.tile{display:flex;gap:14px;align-items:center;padding:16px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);cursor:pointer;text-align:left;width:100%;transition:border-color .15s,box-shadow .15s,transform .15s}
+.tile:hover{border-color:var(--orange);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.tile b{display:block;font-size:15px}.tile span{font-size:13px;color:var(--muted)}
+.tile.sel{border-color:var(--orange);background:var(--orange-50);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
+/* menus / dropdowns */
+.dd{position:relative;display:inline-flex}
+.menu{position:absolute;right:0;top:calc(100% + 6px);min-width:240px;background:var(--surface);border:1px solid var(--line-strong);border-radius:8px;box-shadow:var(--shadow-lg);padding:6px;z-index:80;display:none}
+.menu.up{top:auto;bottom:calc(100% + 6px)}
+.open>.menu{display:block}
+.menu button,.menu a{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:8px;cursor:pointer;text-decoration:none;font-size:14px;color:var(--text)}
+.menu button:hover,.menu button:focus-visible,.menu a:hover{background:var(--g100)}
+.menu i{font-size:16px;color:var(--orange-700);margin-top:1px}.menu small{display:block;font-size:12px;color:var(--muted);font-weight:400}.menu b{font-weight:600}
+.menu hr{border:0;border-top:1px solid var(--line);margin:6px 0}.menu .danger,.menu .danger i{color:var(--err)}
+.split{position:relative;display:inline-flex}
+.split .btn:first-child{border-top-right-radius:0;border-bottom-right-radius:0}
+.split .split-caret{border-top-left-radius:0;border-bottom-left-radius:0;border-left:1px solid rgba(255,255,255,.55);padding:0 10px}
+.split.compact .btn{min-height:32px;padding:0 10px}
+/* modal */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-start;justify-content:center;padding:10vh 16px 16px;z-index:120}
+.modal-back.open{display:flex}
+.modal{width:100%;max-width:520px;background:var(--surface);border-radius:10px;box-shadow:var(--shadow-lg);border:1px solid var(--line);overflow:hidden}
+.modal.wide{max-width:640px}
+.modal-head{display:flex;align-items:center;padding:18px 22px;border-bottom:1px solid var(--line)}.modal-head h3{font-size:17px}.modal-head button{margin-left:auto}
+.modal-body{padding:20px 22px}.modal-foot{display:flex;gap:10px;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--line);background:var(--g50)}
+.cmd-input{display:flex;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}.cmd-input input{border:0;box-shadow:none;min-height:30px;padding:0;font-size:16px;background:none}
+.cmd-list{max-height:340px;overflow:auto;padding:8px}.cmd-list button{display:flex;gap:12px;align-items:center;width:100%;padding:10px 12px;border:0;background:none;border-radius:6px;cursor:pointer;text-align:left}
+.cmd-list button:hover,.cmd-list button.on{background:var(--g100)}.cmd-list .grp{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted);padding:8px 12px 4px}
+.toast-wrap{position:fixed;right:20px;bottom:20px;display:grid;gap:10px;z-index:200}
+.toast{display:flex;gap:10px;align-items:center;background:var(--strong-bg);color:var(--strong-fg);padding:12px 16px;border-radius:8px;box-shadow:var(--shadow-lg);font-size:14px;font-weight:500;animation:pop .2s}
+@keyframes pop{from{transform:translateY(8px);opacity:0}}
+/* sticky action bars */
+.actionbar{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;justify-content:flex-end;padding:14px 0;margin-top:20px;background:linear-gradient(to top,var(--bg) 70%,transparent);z-index:20}
+.editor-bar{position:sticky;top:var(--top);z-index:40;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 0 14px;margin:-8px 0 20px;background:var(--bg);border-bottom:1px solid var(--line)}
+.editor-bar h1{font-size:20px}.editor-bar .save{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+/* thumbnails / paper preview */
+.mini{background:#fff;border:1px solid var(--line);border-radius:6px;height:170px;padding:14px 16px;overflow:hidden;box-shadow:var(--shadow-sm);color:#000}
+.mini .mh{display:flex;gap:8px;align-items:center;justify-content:center}.mini .lg{width:22px;height:22px;border-radius:50%;flex:none}
+.mini .tt{display:grid;gap:3px;justify-items:center}.mini .tt b{display:block;height:6px;width:96px;border-radius:2px}.mini .tt i{display:block;height:3px;width:70px;background:#9ca3af;border-radius:2px}.mini .tt i+i{width:54px}
+.mini hr{border:0;border-top:1.5px solid;margin:8px 0}.mini .ln{display:grid;gap:5px}.mini .ln i{display:block;height:3px;background:#d1d5db;border-radius:2px}.mini .ln i:nth-child(3n){width:70%}
+.card.design{overflow:hidden;display:flex;flex-direction:column}
+.card.design .thumb{padding:14px;background:var(--g50);border-bottom:1px solid var(--line);cursor:pointer}
+.card.design .body{padding:14px 16px;display:grid;gap:10px}
+.card.design .meta{margin-top:auto;padding:10px 16px;border-top:1px solid var(--line);background:var(--g50);font-size:12px;color:var(--muted);display:flex;gap:6px 16px;flex-wrap:wrap}
+.sheet{background:#fff;color:#000;border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow-md);aspect-ratio:210/297;padding:7% 8%;font-family:"Times New Roman",Times,serif;font-size:clamp(7px,.95vw,11px);overflow:hidden;line-height:1.35}
+.sheet .org{text-align:center;font-weight:700;font-size:1.9em;margin-bottom:.2em}.sheet .sub{text-align:center;font-weight:700}
+.sheet .hdr{display:flex;gap:.8em;align-items:center;justify-content:center}.sheet .lg{width:3.4em;height:3.4em;border-radius:50%;background:#1d4ed8;flex:none}
+.sheet hr{border:0;border-top:.15em solid #f97316;margin:.8em 0}.sheet .kv{display:flex;justify-content:space-between;margin-bottom:.6em}
+.sheet ul{margin:.3em 0 0 1.6em;padding:0}.sheet .q{display:flex;justify-content:space-between;margin:1.4em 0}
+.sheet .ph{background:#fff3cd;color:#7a5b00;font-style:italic;border-radius:2px;padding:0 .2em}
+.preview-wrap{position:sticky;top:calc(var(--top) + 84px)}
+/* two-pane editor layouts */
+.split-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.85fr);gap:24px;align-items:start}
+@media(max-width:1100px){.split-layout{grid-template-columns:1fr}.preview-wrap{position:static}}
+.q-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:20px;align-items:start}
+@media(max-width:1000px){.q-layout{grid-template-columns:1fr}}
+.qlist{max-height:calc(100vh - 230px);overflow:auto}
+.qitem{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:left}
+.qitem:hover{background:var(--g50)}.qitem[aria-current="true"]{background:var(--orange-50);box-shadow:inset 3px 0 0 var(--orange)}
+.qitem .n{font-weight:700;min-width:30px;font-variant-numeric:tabular-nums}.qitem .t{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--err);flex:none;margin-top:7px}
+.rte{border:1.5px solid var(--line-strong);border-radius:8px;overflow:hidden;background:var(--surface)}
+.rte:focus-within{border-color:var(--orange);box-shadow:var(--focus)}
+.rte-bar{display:flex;gap:2px;flex-wrap:wrap;align-items:center;padding:6px 8px;background:var(--g50);border-bottom:1px solid var(--line)}
+.rte-bar button{border:0;background:none;width:32px;height:32px;border-radius:8px;cursor:pointer;color:var(--muted)}.rte-bar button:hover,.rte-bar button.on{background:var(--strong-bg);color:var(--strong-fg)}
+.rte-bar .sep{width:1px;height:20px;background:var(--line);margin:0 6px}
+.rte-body{padding:12px 14px;min-height:96px;outline:none;font-size:15px}
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start}
+.opt .radio{margin-top:10px}
+input[type=radio],input[type=checkbox]{width:18px;height:18px;accent-color:var(--orange);cursor:pointer}
+.grid-sheet{width:100%;border-collapse:collapse;font-size:13.5px}
+.grid-sheet th{background:var(--g50);border:1px solid var(--line);padding:8px 10px;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;position:sticky;top:0}
+.grid-sheet td{border:1px solid var(--line);padding:9px 10px;white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.grid-sheet td.lock{background:var(--g50);color:var(--muted);font-style:italic}.grid-sheet td.bad{background:var(--err-bg);box-shadow:inset 0 0 0 1.5px var(--err)}
+.grid-sheet tr:hover td:not(.lock):not(.bad){background:var(--orange-50)}
+.drop{border:2px dashed var(--line-strong);border-radius:8px;padding:40px 20px;text-align:center;background:var(--g50);cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover{border-color:var(--orange);background:var(--orange-50)}.drop i{font-size:36px;color:var(--orange)}
+.steps{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:22px}
+.step{display:flex;gap:8px;align-items:center;font-size:14px;font-weight:600;color:var(--muted)}
+.step .num{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--g100);font-size:13px}
+.step.on{color:var(--text)}.step.on .num{background:var(--orange);color:#fff}.step.done .num{background:var(--ok-bg);color:var(--ok)}
+.steps .line{flex:0 0 28px;height:2px;background:var(--line-strong)}
+.palette{display:flex;gap:8px;flex-wrap:wrap}.swatch{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1.5px var(--line-strong);cursor:pointer}.swatch[aria-pressed="true"]{box-shadow:0 0 0 2.5px var(--text)}
+.el{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface)}
+.el .grip{color:var(--line-strong);cursor:grab}.el .ico{width:32px;height:32px;font-size:15px}
+.acc{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.acc>button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:var(--g50);padding:12px 16px;font-weight:600;cursor:pointer;text-align:left}
+.acc>button i.chev{margin-left:auto;transition:transform .15s}.acc.open>button i.chev{transform:rotate(180deg)}
+.acc>div{display:none;padding:16px}.acc.open>div{display:block}
+.kbd-grid{display:grid;grid-template-columns:1fr auto;gap:10px 24px;font-size:14px}
+body[data-kind="letter"] [data-only="paper"],body[data-kind="paper"] [data-only="letter"]{display:none!important}
+.demo-note{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:90;background:var(--strong-bg);color:var(--strong-fg);padding:8px 16px;border-radius:6px;font-size:12.5px;font-weight:500;opacity:.92;pointer-events:none}
+@media(max-width:991px){.demo-note{display:none}}
+</style>
+</head>
+<body data-kind="letter">
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+
+<!-- ═════════ Sidebar ═════════ -->
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+  <a class="brand" href="#dashboard" data-go="dashboard"><span class="brand-mark"><i class="bi bi-file-earmark-text-fill"></i></span>PaperForge</a>
+  <nav>
+    <button class="nav-item" data-go="dashboard"><i class="bi bi-house-door"></i>Home</button>
+    <div class="nav-label">Question bank</div>
+    <button class="nav-item" data-go="templates"><i class="bi bi-grid-3x3-gap"></i>Templates<span class="count">6</span></button>
+    <button class="nav-item" data-go="qsets"><i class="bi bi-collection"></i>Question sets<span class="count">5</span></button>
+    <div class="nav-label">Documents</div>
+    <button class="nav-item" data-go="letters"><i class="bi bi-envelope-paper"></i>Letterheads<span class="count">4</span></button>
+    <button class="nav-item" data-go="papers"><i class="bi bi-journal-text"></i>Exam papers<span class="count">3</span></button>
+    <div class="nav-label">Workspace</div>
+    <button class="nav-item" data-go="backup"><i class="bi bi-shield-check"></i>Backup &amp; restore</button>
+    <button class="nav-item" data-open="m-help"><i class="bi bi-keyboard"></i>Shortcuts &amp; help</button>
+  </nav>
+  <div class="side-foot">
+    <div class="card card-pad" style="box-shadow:none;background:var(--g50)">
+      <div class="row small fw6"><i class="bi bi-hdd accent"></i>Browser storage<span class="right muted">12%</span></div>
+      <div class="meter" style="margin:8px 0"><i style="width:12%"></i></div>
+      <p class="xs muted">Everything is stored on this computer. Back up regularly.</p>
+      <button class="btn btn-sm" style="margin-top:10px;width:100%" data-go="backup">Back up now</button>
+    </div>
+  </div>
+</aside>
+<div class="scrim" id="scrim" hidden></div>
+
+<div>
+<!-- ═════════ Top bar ═════════ -->
+<header class="topbar">
+  <button class="btn btn-ghost btn-icon hamburger" id="burger" aria-label="Open menu"><i class="bi bi-list" style="font-size:20px"></i></button>
+  <nav class="crumbs" aria-label="Breadcrumb"><span id="crumb-parent" class="hide-sm"></span><i class="bi bi-chevron-right xs hide-sm" id="crumb-sep"></i><b id="crumb-title">Home</b></nav>
+  <button class="search-trigger" data-open="m-cmd" aria-label="Search or jump to"><i class="bi bi-search"></i><span class="hide-sm">Search or jump to…</span><kbd>Ctrl K</kbd></button>
+  <div class="dd" id="dd-new">
+    <button class="btn btn-primary" data-dd><i class="bi bi-plus-lg"></i><span class="hide-sm">New</span><i class="bi bi-chevron-down xs"></i></button>
+    <div class="menu" role="menu">
+      <button role="menuitem" data-go="qset-new"><i class="bi bi-collection"></i><span><b>Question set</b><small>From a template</small></span></button>
+      <button role="menuitem" data-go="tpl-edit"><i class="bi bi-grid-3x3-gap"></i><span><b>Template</b><small>Reusable question structure</small></span></button>
+      <hr>
+      <button role="menuitem" data-go="doc" data-kind="letter"><i class="bi bi-envelope-paper"></i><span><b>Letter</b><small>On one of your letterheads</small></span></button>
+      <button role="menuitem" data-go="doc" data-kind="paper"><i class="bi bi-journal-text"></i><span><b>Exam paper</b><small>From a paper format</small></span></button>
+    </div>
+  </div>
+  <button class="btn btn-ghost btn-icon" id="theme" aria-label="Switch light or dark theme"><i class="bi bi-moon"></i></button>
+</header>
+
+<main id="main" tabindex="-1">
+
+<!-- ═════════ HOME ═════════ -->
+<section class="page" id="p-dashboard">
+  <div class="page-head"><div><h1>Good afternoon, Devesh 👋</h1><p>Pick up where you left off, or start something new.</p></div></div>
+  <div class="banner orange" style="margin-bottom:20px"><i class="bi bi-lightbulb"></i><div><b>This is a UI concept demo.</b> Everything is clickable, nothing is saved. Try <kbd>Ctrl K</kbd>, the <b>New</b> menu, the theme switch and the download arrows.</div></div>
+  <h2 class="small muted fw7" style="letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px">Start something</h2>
+  <div class="grid4" style="margin-bottom:28px">
+    <button class="tile" data-go="qset-new"><span class="ico"><i class="bi bi-collection"></i></span><span><b>Question set</b><span>Build and export questions</span></span></button>
+    <button class="tile" data-go="tpl-edit"><span class="ico dark"><i class="bi bi-grid-3x3-gap"></i></span><span><b>Template</b><span>Define subjects &amp; marks</span></span></button>
+    <button class="tile" data-go="doc" data-kind="letter"><span class="ico"><i class="bi bi-envelope-paper"></i></span><span><b>Letter</b><span>Write on a letterhead</span></span></button>
+    <button class="tile" data-go="doc" data-kind="paper"><span class="ico"><i class="bi bi-journal-text"></i></span><span><b>Exam paper</b><span>Fill a paper format</span></span></button>
+  </div>
+  <div class="grid4" style="margin-bottom:28px">
+    <div class="card stat"><span>Templates</span><b>6</b></div><div class="card stat"><span>Question sets</span><b>5</b></div>
+    <div class="card stat"><span>Letters</span><b>128</b></div><div class="card stat"><span>Exam papers</span><b>41</b></div>
+  </div>
+  <div class="split-layout" style="grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr)">
+    <div class="card"><div class="card-head"><i class="bi bi-clock-history lead"></i><h3>Continue where you left off</h3><button class="btn btn-ghost btn-sm right" data-go="qsets">View all</button></div>
+      <ul class="list" id="recent"></ul></div>
+    <div class="stack">
+      <div class="card card-pad"><div class="row"><span class="ico"><i class="bi bi-shield-check"></i></span><div><b>Last backup: 3 days ago</b><p class="small muted">Your data lives only in this browser.</p></div></div>
+        <div class="row" style="margin-top:14px"><button class="btn btn-dark btn-sm" data-go="backup"><i class="bi bi-box-arrow-down"></i>Back up now</button><button class="btn btn-ghost btn-sm" data-toast="We will remind you in 7 days">Remind me later</button></div></div>
+      <div class="card card-pad"><h3 style="font-size:15px;margin-bottom:10px">Handy shortcuts</h3>
+        <div class="kbd-grid"><span>Search &amp; jump anywhere</span><kbd>Ctrl K</kbd><span>Save</span><kbd>Ctrl S</kbd><span>Next / previous question</span><kbd>Alt ↓ / ↑</kbd><span>Show all shortcuts</span><kbd>?</kbd></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════ TEMPLATES ═════════ -->
+<section class="page" id="p-templates" hidden>
+  <div class="page-head"><div><h1>Templates</h1><p>Reusable structures for your question sets.</p></div>
+    <div class="row right"><button class="btn" data-go="backup"><i class="bi bi-shield-check"></i>Backup &amp; restore</button><button class="btn btn-primary" data-go="tpl-edit"><i class="bi bi-plus-lg"></i>New template</button></div></div>
+  <div class="toolbar">
+    <div class="input-affix"><i class="bi bi-search"></i><input type="search" placeholder="Search templates…" data-filter="#tpl-grid" aria-label="Search templates"></div>
+    <select aria-label="Filter by tag"><option>All tags</option><option>ctet</option><option>jee</option><option>teaching</option></select>
+    <select aria-label="Sort"><option>Recently edited</option><option>Newest</option><option>Name A–Z</option></select>
+    <div class="seg right" role="group" aria-label="View"><button aria-pressed="true" data-view="grid" data-target="#tpl-grid" aria-label="Grid view"><i class="bi bi-grid"></i></button><button aria-pressed="false" data-view="list" data-target="#tpl-grid" aria-label="List view"><i class="bi bi-list"></i></button></div>
+  </div>
+  <div class="grid3" id="tpl-grid"></div>
+</section>
+
+<!-- ═════════ TEMPLATE EDIT ═════════ -->
+<section class="page" id="p-tpl-edit" hidden>
+  <div class="editor-bar"><button class="btn btn-ghost btn-icon" data-go="templates" aria-label="Back"><i class="bi bi-arrow-left"></i></button><h1>New template</h1><span class="badge warn right"><i class="bi bi-circle-fill" style="font-size:7px"></i>Unsaved</span><button class="btn" data-go="templates">Cancel</button><button class="btn btn-primary" data-toast="Template saved" data-go="templates"><i class="bi bi-check-lg"></i>Create template</button></div>
+  <div class="split-layout">
+    <div class="stack">
+      <div class="card"><div class="card-head"><i class="bi bi-info-circle lead"></i><h3>Details</h3></div><div class="card-pad stack">
+        <div class="field"><label for="t-name">Template name</label><input id="t-name" type="text" placeholder="e.g. JEE Main 2026 mock"></div>
+        <div class="field"><label>Tags</label><div class="row" style="gap:8px"><span class="badge orange">ctet <i class="bi bi-x"></i></span><span class="badge orange">teaching <i class="bi bi-x"></i></span><input type="text" placeholder="Add a tag and press Enter" style="max-width:220px" aria-label="Add tag"></div></div>
+        <div class="row"><label class="switch"><input type="checkbox" checked> Limit number of questions</label><input type="number" value="150" style="width:110px" aria-label="Max questions"></div></div></div>
+      <div class="card"><div class="card-head"><i class="bi bi-layers lead"></i><h3>Subject blocks</h3><span class="muted small">Which question numbers belong to which subject</span></div>
+        <div class="card-pad stack">
+          <div class="banner warn"><i class="bi bi-exclamation-triangle"></i><span>Q121–Q150 are not covered by any block. Those questions will need a subject typed by hand.</span></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>From Q</th><th>To Q</th><th>Subject</th><th>Correct</th><th>Negative</th><th></th></tr></thead><tbody>
+            <tr><td><input type="number" value="1" style="width:80px"></td><td><input type="number" value="30" style="width:80px"></td><td><input type="text" value="Child Development"></td><td><input type="number" value="1" style="width:80px"></td><td><input type="number" value="0.25" style="width:90px"></td><td class="actions"><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove block"><i class="bi bi-trash3"></i></button></td></tr>
+            <tr><td><input type="number" value="31" style="width:80px"></td><td><input type="number" value="60" style="width:80px"></td><td><input type="text" value="Mathematics"></td><td><input type="number" value="1" style="width:80px"></td><td><input type="number" value="0.25" style="width:90px"></td><td class="actions"><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove block"><i class="bi bi-trash3"></i></button></td></tr>
+          </tbody></table></div>
+          <p class="hint"><i class="bi bi-magic"></i> Type negative marks as a positive number (0.25). They are saved as −0.25 and can never exceed the correct marks.</p>
+          <div><button class="btn"><i class="bi bi-plus-lg"></i>Add block</button></div></div></div>
+    </div>
+    <div class="preview-wrap"><div class="card"><div class="card-head"><i class="bi bi-eye lead"></i><h3>Field lock preview</h3></div><div class="card-pad">
+      <p class="small muted" style="margin-bottom:12px">Locked fields are pre-filled from the template; editable fields are typed per question.</p>
+      <table class="tbl"><thead><tr><th>Field</th><th>Q1–30</th><th>Q31–60</th></tr></thead><tbody>
+        <tr><td>Subject</td><td><span class="badge">Locked</span></td><td><span class="badge">Locked</span></td></tr><tr><td>Topic</td><td><span class="badge ok">Editable</span></td><td><span class="badge ok">Editable</span></td></tr>
+        <tr><td>Correct marks</td><td><span class="badge">Locked</span></td><td><span class="badge">Locked</span></td></tr><tr><td>Negative</td><td><span class="badge">Locked</span></td><td><span class="badge">Locked</span></td></tr></tbody></table></div></div></div>
+  </div>
+</section>
+
+<!-- ═════════ QUESTION SETS (list with inline download) ═════════ -->
+<section class="page" id="p-qsets" hidden>
+  <div class="page-head"><div><h1>Question sets</h1><p>Open one to edit, or download the .docx straight from the list.</p></div><div class="row right"><button class="btn" data-go="import"><i class="bi bi-upload"></i>Import</button><button class="btn btn-primary" data-go="qset-new"><i class="bi bi-plus-lg"></i>New question set</button></div></div>
+  <div class="toolbar"><div class="input-affix"><i class="bi bi-search"></i><input type="search" placeholder="Search question sets…" data-filter="#qset-rows" aria-label="Search"></div>
+    <div class="row" style="gap:6px"><button class="chip" aria-pressed="true" data-chip>All</button><button class="chip" aria-pressed="false" data-chip>Ready to export</button><button class="chip" aria-pressed="false" data-chip>Has issues <span class="badge err">2</span></button></div>
+    <select class="right" aria-label="Sort"><option>Recently edited</option><option>Name A–Z</option></select></div>
+  <div class="card tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th>Questions</th><th>Status</th><th>Last exported</th><th style="text-align:right">Actions</th></tr></thead><tbody id="qset-rows"></tbody></table></div>
+</section>
+
+<!-- ═════════ NEW QUESTION SET ═════════ -->
+<section class="page" id="p-qset-new" hidden>
+  <div class="page-head"><div><h1>New question set</h1><p>Choose a template, then give it a name.</p></div></div>
+  <div class="steps"><span class="step on"><span class="num">1</span>Template</span><span class="line"></span><span class="step"><span class="num">2</span>Name</span></div>
+  <div class="split-layout"><div class="stack">
+    <div class="input-affix"><i class="bi bi-search"></i><input type="search" placeholder="Search templates…" aria-label="Search templates"></div>
+    <div class="grid2" id="tpl-pick"></div>
+    <div class="card card-pad stack"><div class="field"><label for="qs-title">Question set name</label><input id="qs-title" type="text" value="CTET Mocktest 2027"></div><p class="hint">This is also the .docx file name when you export.</p></div>
+    <div class="actionbar"><button class="btn" data-go="qsets">Cancel</button><button class="btn btn-primary" data-go="qeditor" data-toast="Question set created">Create &amp; start adding questions <i class="bi bi-arrow-right"></i></button></div></div>
+    <div class="preview-wrap card card-pad"><h3 style="font-size:15px;margin-bottom:8px">CTET 2026</h3><p class="small muted" style="margin-bottom:12px">150 questions · 5 subject blocks</p><div class="stack" style="gap:8px"><div class="row"><span class="badge">Q1–30</span>Child Development</div><div class="row"><span class="badge">Q31–60</span>Mathematics</div><div class="row"><span class="badge">Q61–90</span>Environmental Studies</div><div class="row"><span class="badge">Q91–120</span>Language I</div></div></div></div>
+</section>
+
+<!-- ═════════ QUESTION EDITOR ═════════ -->
+<section class="page" id="p-qeditor" hidden>
+  <div class="editor-bar"><button class="btn btn-ghost btn-icon" data-go="qsets" aria-label="Back"><i class="bi bi-arrow-left"></i></button>
+    <div><h1>CTET Mocktest 2026</h1><span class="save"><i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>All changes saved · CTET 2026</span></div>
+    <div class="row right"><button class="btn" data-toggle="#issues"><i class="bi bi-exclamation-triangle" style="color:var(--err)"></i>2 issues</button><button class="btn" data-go="import"><i class="bi bi-upload"></i>Import</button><span data-split></span></div></div>
+  <div class="tabs" role="tablist" data-tabs="qed"><button role="tab" aria-selected="true" data-tab="q-form"><i class="bi bi-ui-checks-grid"></i> Form entry</button><button role="tab" aria-selected="false" data-tab="q-grid"><i class="bi bi-table"></i> Bulk grid</button></div>
+  <div class="panel" data-panel="q-form" data-group="qed">
+    <div class="q-layout">
+      <div class="card"><div class="card-pad" style="padding:12px"><div class="input-affix"><i class="bi bi-search"></i><input type="search" placeholder="Find a question…" aria-label="Find a question"></div><div class="row" style="margin-top:10px;gap:6px"><button class="chip" aria-pressed="true" data-chip>All 24</button><button class="chip" aria-pressed="false" data-chip>Issues 2</button></div></div>
+        <div class="qlist" id="qlist"></div><div style="padding:12px;border-top:1px solid var(--line)"><button class="btn" style="width:100%"><i class="bi bi-plus-lg"></i>Add question</button></div></div>
+      <div class="stack">
+        <div class="card" id="issues" hidden><div class="card-head"><i class="bi bi-exclamation-triangle lead" style="color:var(--err)"></i><h3>2 things to fix before exporting</h3><button class="btn btn-ghost btn-sm right" data-toggle="#issues" aria-label="Close"><i class="bi bi-x-lg"></i></button></div><ul class="list"><li><span class="badge err">Q3</span>Select the correct option<button class="btn btn-sm right" data-toast="Jumped to Q3">Go to Q3</button></li><li><span class="badge err">Q7</span>Negative Marks (−4) cannot be more than Correct Marks (1)<button class="btn btn-sm right" data-toast="Jumped to Q7">Go to Q7</button></li></ul></div>
+        <div class="card"><div class="card-head"><span class="badge dark" style="background:var(--strong-bg);color:var(--strong-fg)">Q3</span><h3>Question details</h3><span class="badge right"><i class="bi bi-lock"></i>Subject locked by template</span></div>
+          <div class="card-pad stack">
+            <div class="grid3"><div class="field"><label>Subject</label><input type="text" value="Mathematics" disabled></div><div class="field"><label for="topic">Topic</label><input id="topic" type="text" placeholder="e.g. Fractions"></div><div class="field"><label>Tags</label><input type="text" placeholder="comma separated"></div></div>
+            <div class="field"><span class="lbl">Question type</span><div class="seg" role="group" aria-label="Question type" style="width:fit-content"><button aria-pressed="true" data-seg>Single choice</button><button aria-pressed="false" data-seg>Multiple choice</button><button aria-pressed="false" data-seg>True / False</button></div></div>
+            <div class="field"><span class="lbl">Question</span><div class="rte"><div class="rte-bar" data-rte></div><div class="rte-body" contenteditable="true">What is the sum of the angles of a triangle?</div></div></div>
+            <div class="field"><span class="lbl">Options <span class="muted fw6">· pick the correct one</span></span><div class="stack" style="gap:10px" id="opts"></div><div><button class="btn btn-sm"><i class="bi bi-plus-lg"></i>Add option</button></div></div>
+            <div class="field"><span class="lbl">Explanation <span class="muted fw6">(optional)</span></span><div class="rte"><div class="rte-bar" data-rte></div><div class="rte-body" contenteditable="true"></div></div></div>
+            <div class="grid4"><div class="field"><label for="cm">Correct marks</label><input id="cm" type="number" value="1"></div><div class="field"><label for="nm">Negative marks</label><input id="nm" type="number" value="0.25"><span class="hint">Saved as −0.25</span></div><div class="field" style="grid-column:span 2"><span class="lbl">Difficulty</span><div class="seg" style="width:fit-content"><button aria-pressed="false" data-seg>Easy</button><button aria-pressed="true" data-seg>Medium</button><button aria-pressed="false" data-seg>Hard</button></div></div></div>
+          </div>
+          <div class="row" style="padding:14px 20px;border-top:1px solid var(--line);background:var(--g50)"><button class="btn"><i class="bi bi-arrow-up"></i>Previous</button><span class="muted small">Ctrl S saves · Alt ↓ next</span><button class="btn btn-dark right" data-toast="Saved Q3">Save &amp; next <i class="bi bi-arrow-down"></i></button></div></div>
+      </div></div>
+  </div>
+  <div class="panel" data-panel="q-grid" data-group="qed" hidden>
+    <div class="toolbar"><button class="btn btn-sm"><i class="bi bi-clipboard"></i>Paste from Excel</button><button class="btn btn-sm"><i class="bi bi-plus-lg"></i>Add 10 rows</button><span class="muted small">Double-click a cell to edit · Enter opens the rich editor · greyed cells are locked by the template</span></div>
+    <div class="card tbl-wrap" id="gridwrap"></div>
+  </div>
+</section>
+
+<!-- ═════════ IMPORT ═════════ -->
+<section class="page" id="p-import" hidden>
+  <div class="page-head"><div><h1>Import questions</h1><p>Add questions to “CTET Mocktest 2026” from a Word, Excel or CSV file.</p></div><button class="btn right" data-go="qeditor"><i class="bi bi-arrow-left"></i>Back to editor</button></div>
+  <div class="steps"><span class="step done"><span class="num"><i class="bi bi-check"></i></span>Upload</span><span class="line"></span><span class="step on"><span class="num">2</span>Review</span><span class="line"></span><span class="step"><span class="num">3</span>Done</span></div>
+  <div class="split-layout"><div class="stack">
+    <div class="drop" tabindex="0" role="button" data-toast="File chooser would open here"><i class="bi bi-cloud-arrow-up"></i><h3 style="margin:8px 0 4px">Drop a file here, or click to browse</h3><p class="muted small">.docx · .xlsx · .csv — up to 10 MB</p></div>
+    <div class="row"><span class="muted small">Not sure about the format?</span><button class="btn btn-sm" data-toast="Sample .docx downloaded"><i class="bi bi-file-earmark-word"></i>Sample .docx</button><button class="btn btn-sm" data-toast="Sample .csv downloaded"><i class="bi bi-filetype-csv"></i>Sample .csv</button></div>
+    <div class="card"><div class="card-head"><i class="bi bi-list-check lead"></i><h3>Review · 24 questions found</h3><span class="badge ok right">22 ready</span><span class="badge warn">2 notices</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Question</th><th>Type</th><th>Marks</th><th>Notes</th></tr></thead><tbody>
+      <tr><td>1</td><td>What is the sum of the angles of a triangle?</td><td>Single</td><td>1 / −0.25</td><td><span class="badge ok">OK</span></td></tr>
+      <tr><td>2</td><td>Which of these is a prime number?</td><td>Single</td><td>1 / −0.25</td><td><span class="badge ok">OK</span></td></tr>
+      <tr><td>3</td><td>Choose the odd one out…</td><td>Single</td><td>1 / −0.25</td><td><span class="badge warn">Unknown difficulty “mid”, set to Medium</span></td></tr>
+      <tr><td>4</td><td>Q4 already exists</td><td>Single</td><td>1 / −0.25</td><td><span class="badge warn">Will overwrite existing Q4</span></td></tr></tbody></table></div></div>
+    <div class="actionbar"><button class="btn" data-go="qeditor">Cancel</button><button class="btn btn-primary" data-go="qeditor" data-toast="24 questions imported"><i class="bi bi-check-lg"></i>Import 24 questions</button></div></div>
+    <div class="preview-wrap card card-pad"><h3 style="font-size:15px;margin-bottom:8px">How import works</h3><ol class="small muted" style="padding-left:18px;margin:0;display:grid;gap:8px"><li>Locked fields (subject, marks) are applied from the template.</li><li>Negative marks are saved as minus automatically.</li><li>Nothing is added until you press Import.</li></ol></div></div>
+</section>
+
+<!-- ═════════ LETTERHEADS / EXAM PAPERS (one shared pattern) ═════════ -->
+<section class="page" id="p-letters" hidden></section>
+<section class="page" id="p-papers" hidden></section>
+
+<!-- ═════════ DESIGN BUILDER (letterhead or paper format) ═════════ -->
+<section class="page" id="p-builder" hidden>
+  <div class="editor-bar"><button class="btn btn-ghost btn-icon" data-back aria-label="Back"><i class="bi bi-arrow-left"></i></button><h1 id="b-title">New letterhead</h1><span class="badge warn right"><i class="bi bi-circle-fill" style="font-size:7px"></i>Unsaved</span><button class="btn" data-back>Cancel</button><button class="btn" data-go="doc"><i class="bi bi-file-earmark-plus"></i><span data-only="letter">Save &amp; write a letter</span><span data-only="paper">Save &amp; make a paper</span></button><button class="btn btn-primary" data-toast="Saved" data-back><i class="bi bi-check-lg"></i>Save</button></div>
+  <div class="split-layout"><div>
+    <div class="tabs" role="tablist" data-tabs="bld"><button role="tab" aria-selected="true" data-tab="b-basics">Basics</button><button role="tab" aria-selected="false" data-tab="b-colours">Colours</button><button role="tab" aria-selected="false" data-tab="b-header">Header</button><button role="tab" aria-selected="false" data-tab="b-details">Details table</button><button role="tab" aria-selected="false" data-tab="b-body">Body</button></div>
+    <div class="panel stack" data-panel="b-basics" data-group="bld">
+      <div class="card card-pad stack">
+        <div class="field"><label for="b-name">Name</label><input id="b-name" type="text" value="School letterhead"></div>
+        <div class="field"><label>Tags</label><div class="row" style="gap:8px"><span class="badge orange">school <i class="bi bi-x"></i></span><span class="badge orange">official <i class="bi bi-x"></i></span><input type="text" placeholder="Add tag" style="max-width:160px" aria-label="Add tag"></div></div>
+        <div class="field"><label for="b-file">Download file name</label><input id="b-file" type="text" value="{Subject Code} {Subject}"><div class="row" style="gap:6px"><span class="hint">Add a field:</span><button class="chip">{Subject}</button><button class="chip">{Subject Code}</button><button class="chip">{Date}</button></div><span class="hint">Becomes e.g. <b>247 Maths</b>. Used for Word and PDF.</span></div>
+        <div class="row" style="gap:24px;align-items:flex-start"><div class="field"><span class="lbl">Header placement</span><div class="seg"><button aria-pressed="true" data-seg>First page only</button><button aria-pressed="false" data-seg>Every page</button></div></div><div class="field"><span class="lbl">Paper size</span><div class="seg"><button aria-pressed="true" data-seg>A4</button><button aria-pressed="false" data-seg>Letter</button></div></div><div class="field"><label for="mg">Margins</label><input id="mg" type="number" value="25.4" style="width:100px"></div></div>
+      </div></div>
+    <div class="panel stack" data-panel="b-colours" data-group="bld" hidden>
+      <div class="card card-pad stack"><div class="field"><span class="lbl">Brand palette</span><div class="palette" id="pal"><button class="swatch" style="background:#7030a0" aria-pressed="true" aria-label="Purple"></button><button class="swatch" style="background:#f97316" aria-pressed="false" aria-label="Orange"></button><button class="swatch" style="background:#0a0a0a" aria-pressed="false" aria-label="Black"></button><button class="swatch" style="background:#1d4ed8" aria-pressed="false" aria-label="Blue"></button><button class="swatch" style="background:#15803d" aria-pressed="false" aria-label="Green"></button><button class="btn btn-sm"><i class="bi bi-plus-lg"></i>Add</button></div><span class="hint">Palette colours appear as one-click swatches in every colour field.</span></div>
+        <div class="field"><label for="c-title">Organisation name colour</label><div class="row"><input type="color" id="c-title" value="#7030a0"><input type="text" value="#7030a0" class="mono" style="max-width:120px" aria-label="Hex"><span class="badge ok"><i class="bi bi-check2"></i>Good contrast</span></div></div>
+        <label class="switch"><input type="checkbox"> Coloured background behind the header</label><label class="switch"><input type="checkbox"> Border around the header</label></div></div>
+    <div class="panel stack" data-panel="b-header" data-group="bld" hidden>
+      <div class="card card-pad stack"><div class="row"><b>Header elements</b><span class="muted small">drag to reorder</span></div>
+        <div class="el"><i class="bi bi-grip-vertical grip"></i><span class="ico"><i class="bi bi-image"></i></span><div><b>Logo</b><div class="xs muted">22 mm · left of heading</div></div><button class="btn btn-ghost btn-sm right">Edit</button></div>
+        <div class="el"><i class="bi bi-grip-vertical grip"></i><span class="ico"><i class="bi bi-fonts"></i></span><div><b>Organisation name</b><div class="xs muted">Times New Roman · 20 pt · bold</div></div><button class="btn btn-ghost btn-sm right">Edit</button></div>
+        <div class="el"><i class="bi bi-grip-vertical grip"></i><span class="ico"><i class="bi bi-fonts"></i></span><div><b>Address</b><div class="xs muted">Times New Roman · 10 pt</div></div><button class="btn btn-ghost btn-sm right">Edit</button></div>
+        <div class="el"><i class="bi bi-grip-vertical grip"></i><span class="ico"><i class="bi bi-dash-lg"></i></span><div><b>Divider</b><div class="xs muted">1.5 pt · solid · orange</div></div><button class="btn btn-ghost btn-sm right">Edit</button></div>
+        <div class="row"><button class="btn btn-sm"><i class="bi bi-image"></i>Logo</button><button class="btn btn-sm"><i class="bi bi-fonts"></i>Text line</button><button class="btn btn-sm"><i class="bi bi-dash-lg"></i>Divider</button></div></div>
+      <div class="card card-pad stack"><b>Logo</b><div class="row"><div class="ico" style="width:56px;height:56px;border-radius:50%;background:#1d4ed8;color:#fff">LOGO</div><button class="btn btn-sm"><i class="bi bi-upload"></i>Replace image</button></div>
+        <div class="field"><span class="lbl">Logo position</span><div class="seg" style="width:fit-content"><button aria-pressed="false" data-seg>Own row</button><button aria-pressed="true" data-seg>Left of heading</button><button aria-pressed="false" data-seg>Right of heading</button></div></div></div></div>
+    <div class="panel stack" data-panel="b-details" data-group="bld" hidden>
+      <div class="card card-pad stack"><p class="small muted">Fields shown in a two-column table under the header. You fill them in for every document.</p>
+        <div class="row"><input type="text" value="Subject" style="max-width:220px" aria-label="Label"><select style="max-width:180px" aria-label="Type"><option>Text</option><option>Date</option><option>Time from – to</option></select><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove"><i class="bi bi-trash3"></i></button></div>
+        <div class="row"><input type="text" value="Subject Code" style="max-width:220px" aria-label="Label"><select style="max-width:180px" aria-label="Type"><option>Text</option></select><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove"><i class="bi bi-trash3"></i></button></div>
+        <div class="row"><input type="text" value="Time" style="max-width:220px" aria-label="Label"><select style="max-width:180px" aria-label="Type"><option>Time from – to</option></select><span class="badge info">12-hour</span></div>
+        <div><button class="btn btn-sm"><i class="bi bi-plus-lg"></i>Add field</button></div></div></div>
+    <div class="panel stack" data-panel="b-body" data-group="bld" hidden>
+      <div class="card card-pad stack"><div class="grid3"><div class="field"><label>Font</label><select><option>Times New Roman</option><option>Calibri</option><option>Arial</option></select></div><div class="field"><label>Text size</label><input type="number" value="12"></div><div class="field" data-only="paper"><label>Question size</label><input type="number" value="14"></div></div>
+        <div data-only="letter" class="field"><span class="lbl">Default letter text <span class="muted fw6">(optional · pre-filled in every new letter)</span></span><div class="rte"><div class="rte-bar" data-rte></div><div class="rte-body" contenteditable="true">Dear Parents,</div></div></div>
+        <div data-only="paper" class="stack"><div class="field"><label>Instructions heading</label><input type="text" value="Instructions -"></div><div class="field"><label>Default instructions</label><textarea>Attempt any two from the given questions.&#10;Write your roll number, subject code, and date on the answer book paper.</textarea></div><div class="row"><label class="switch"><input type="checkbox" checked> Maximum marks line</label><label class="switch"><input type="checkbox" checked> “Viva” line after the last question</label><label class="switch"><input type="checkbox" checked> Rule above questions</label></div></div></div></div>
+  </div>
+  <div class="preview-wrap"><div class="row" style="margin-bottom:8px"><span class="small fw6 muted">Live preview (A4)</span><span class="small muted right" data-only="letter"><i class="bi bi-arrow-repeat"></i> header repeats on every page</span></div>
+    <div class="sheet" id="sheet-b"></div><p class="hint" style="margin-top:8px">Highlighted parts are filled in on each document.</p></div></div>
+</section>
+
+<!-- ═════════ DOCUMENT EDITOR (letter or exam paper) ═════════ -->
+<section class="page" id="p-doc" hidden>
+  <div class="editor-bar"><button class="btn btn-ghost btn-icon" data-back aria-label="Back"><i class="bi bi-arrow-left"></i></button>
+    <div><h1 id="d-title">Write a letter</h1><span class="save"><i class="bi bi-check-circle-fill" style="color:var(--ok)"></i>Saved · <span id="d-design">School letterhead</span> · <a href="#" data-go="builder" style="color:var(--orange-700);font-weight:600">Edit design</a></span></div>
+    <div class="row right"><span class="badge info"><i class="bi bi-file-earmark-arrow-down"></i>Will download as <b id="d-fname">247 Maths</b></span><span data-split></span></div></div>
+  <div class="split-layout"><div class="stack">
+    <div class="card"><div class="card-head"><i class="bi bi-pencil-square lead"></i><h3>Details</h3></div><div class="card-pad stack">
+      <div class="field"><label for="d-file">File name <span class="muted fw6">(leave empty for automatic)</span></label><input id="d-file" type="text" placeholder="247 Maths"></div>
+      <div class="grid2" data-only="paper"><div class="field"><label>Center</label><input type="text" value="110126"></div><div class="field"><label>Level</label><input type="text" value="Secondary"></div><div class="field"><label>Month</label><input type="text" value="SEP"></div><div class="field"><label>Year</label><input type="text" value="2026"></div></div>
+      <div class="grid2"><div class="field"><label>Subject / Ref. No.</label><input type="text" value="Maths" id="d-subj"></div><div class="field"><label>Subject code</label><input type="text" value="247" id="d-code"></div>
+        <div class="field"><span class="lbl">Time</span><div class="row" style="gap:6px"><input type="text" value="10" style="width:56px;text-align:center" aria-label="Hour"><b>:</b><input type="text" value="30" style="width:56px;text-align:center" aria-label="Minutes"><button class="btn btn-dark btn-sm" data-ampm>AM</button><span class="muted small">to</span><input type="text" value="1" style="width:56px;text-align:center" aria-label="Hour"><b>:</b><input type="text" value="00" style="width:56px;text-align:center" aria-label="Minutes"><button class="btn btn-dark btn-sm" data-ampm>PM</button></div></div>
+        <div class="field"><label>Date</label><input type="date" value="2026-10-09"></div></div></div></div>
+    <div class="card" data-only="letter"><div class="card-head"><i class="bi bi-body-text lead"></i><h3>Letter text</h3></div><div class="card-pad"><div class="rte"><div class="rte-bar" data-rte></div><div class="rte-body" contenteditable="true" style="min-height:240px"><p>Dear Parents,</p><p>This is to inform you that the <b>annual day</b> will be held on <span style="color:#c2410c">12 December</span>.</p><ul><li>Reporting time: 9:00 AM</li><li>Dress code: school uniform</li></ul><table style="width:100%;border-collapse:collapse;margin-top:8px"><tr><th style="border:1px solid #ccc;padding:6px;background:#f3f4f6">Class</th><th style="border:1px solid #ccc;padding:6px;background:#f3f4f6">Time</th></tr><tr><td style="border:1px solid #ccc;padding:6px">IX</td><td style="border:1px solid #ccc;padding:6px">9:30 AM</td></tr></table></div></div></div></div>
+    <div class="card" data-only="paper"><div class="card-head"><i class="bi bi-list-ul lead"></i><h3>Instructions</h3></div><div class="card-pad stack"><div class="row"><input type="text" value="Attempt any two from the given questions." class="grow" aria-label="Instruction"><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove"><i class="bi bi-trash3"></i></button></div><div class="row"><input type="text" value="Write your roll number, subject code, and date." class="grow" aria-label="Instruction"><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove"><i class="bi bi-trash3"></i></button></div><div class="row"><button class="btn btn-sm"><i class="bi bi-plus-lg"></i>Add instruction</button><div class="field right" style="width:160px"><label>Maximum marks</label><input type="text" value="7.5"></div></div></div></div>
+    <div class="card" data-only="paper"><div class="card-head"><i class="bi bi-question-circle lead"></i><h3>Questions</h3><span class="muted small right">Total 6 M + Viva 1.5 M</span></div><div class="card-pad stack" id="dq"></div></div>
+  </div>
+  <div class="preview-wrap"><div class="row" style="margin-bottom:8px"><span class="small fw6 muted">Preview (A4)</span><span class="small muted right">updates as you type</span></div><div class="sheet" id="sheet-d"></div></div></div>
+</section>
+
+<!-- ═════════ BACKUP ═════════ -->
+<section class="page" id="p-backup" hidden>
+  <div class="page-head"><div><h1>Backup &amp; restore</h1><p>All your work lives in this browser. Keep a copy somewhere safe.</p></div></div>
+  <div class="banner warn" style="margin-bottom:20px"><i class="bi bi-exclamation-triangle"></i><span>Clearing browser data or switching computers removes your work. A backup file is the only way to bring it back.</span></div>
+  <div class="grid2" id="bk"></div>
+  <div class="card card-pad row" style="margin-top:16px"><span class="ico"><i class="bi bi-bell"></i></span><div><b>Backup reminders</b><p class="small muted">We will nudge you on the Home page.</p></div><select class="right" style="width:auto" aria-label="Reminder"><option>Every week</option><option>Every month</option><option>Never</option></select></div>
+</section>
+
+</main>
+</div></div>
+
+<!-- ═════════ Modals ═════════ -->
+<div class="modal-back" id="m-cmd" role="dialog" aria-modal="true" aria-label="Search or jump to"><div class="modal wide">
+  <div class="cmd-input"><i class="bi bi-search"></i><input id="cmd-q" type="text" placeholder="Search templates, question sets, letters, papers, or type a command…" autocomplete="off"><kbd>Esc</kbd></div><div class="cmd-list" id="cmd-list"></div></div></div>
+
+<div class="modal-back" id="m-new" role="dialog" aria-modal="true" aria-labelledby="m-new-t"><div class="modal">
+  <div class="modal-head"><h3 id="m-new-t">New letterhead</h3><button class="btn btn-ghost btn-sm btn-icon" data-close aria-label="Close"><i class="bi bi-x-lg"></i></button></div>
+  <div class="modal-body stack" id="m-new-body"></div></div></div>
+
+<div class="modal-back" id="m-del" role="dialog" aria-modal="true" aria-labelledby="m-del-t"><div class="modal">
+  <div class="modal-head"><h3 id="m-del-t">Delete this item?</h3></div><div class="modal-body"><p>This cannot be undone. Its documents will be deleted too.</p></div>
+  <div class="modal-foot"><button class="btn" data-close>Cancel</button><button class="btn btn-danger" data-close data-toast="Deleted">Delete</button></div></div></div>
+
+<div class="modal-back" id="m-help" role="dialog" aria-modal="true" aria-labelledby="m-help-t"><div class="modal">
+  <div class="modal-head"><h3 id="m-help-t">Keyboard shortcuts</h3><button class="btn btn-ghost btn-sm btn-icon" data-close aria-label="Close"><i class="bi bi-x-lg"></i></button></div>
+  <div class="modal-body"><div class="kbd-grid"><span>Search &amp; jump anywhere</span><kbd>Ctrl K</kbd><span>Save</span><kbd>Ctrl S</kbd><span>Next question</span><kbd>Alt ↓</kbd><span>Previous question</span><kbd>Alt ↑</kbd><span>Open the New menu</span><kbd>N</kbd><span>Show this help</span><kbd>?</kbd><span>Close any dialog</span><kbd>Esc</kbd></div></div></div></div>
+
+<div class="toast-wrap" id="toasts" aria-live="polite"></div>
+<div class="demo-note">UI concept demo · clickable only, nothing is saved</div>
+
+<script>
+/* ═════════ Demo data ═════════ */
+const TEMPLATES=[
+ {n:'CTET 2026',tags:['ctet','teaching'],q:150,b:5,u:'8 Oct 2026'},{n:'JEE Main 2026 mock',tags:['jee','physics'],q:90,b:3,u:'6 Oct 2026'},
+ {n:'NEET Biology drill',tags:['neet'],q:45,b:1,u:'2 Oct 2026'},{n:'Class X Maths unit test',tags:['school'],q:25,b:2,u:'28 Sep 2026'},
+ {n:'Olympiad Reasoning',tags:['olympiad'],q:30,b:1,u:'21 Sep 2026'},{n:'General Knowledge quiz',tags:['quiz','school'],q:50,b:4,u:'10 Sep 2026'}];
+const QSETS=[
+ {n:'CTET Mocktest 2026',t:'CTET 2026',q:150,s:'ok',e:'8 Oct 2026'},{n:'JEE Physics – Set A',t:'JEE Main 2026 mock',q:90,s:'err',e:'—'},
+ {n:'NEET Biology drill 3',t:'NEET Biology drill',q:45,s:'ok',e:'5 Oct 2026'},{n:'Class X Unit Test 1',t:'Class X Maths unit test',q:25,s:'err',e:'—'},
+ {n:'Reasoning Round 2',t:'Olympiad Reasoning',q:30,s:'ok',e:'1 Oct 2026'}];
+const DESIGNS={
+ letter:[{n:'School letterhead',tags:['school','official'],pg:'A4',pl:'Every page',docs:96,c:'8 Oct 2026, 2:59 PM',u:'9 Oct 2026, 10:12 AM',col:'#7030a0'},{n:'Principal’s notice',tags:['notice'],pg:'A4',pl:'First page',docs:21,c:'2 Oct 2026, 11:30 AM',u:'2 Oct 2026, 11:30 AM',col:'#1d4ed8'},{n:'Fee circular',tags:['accounts'],pg:'A4',pl:'First page',docs:8,c:'24 Sep 2026, 4:05 PM',u:'30 Sep 2026, 9:40 AM',col:'#15803d'},{n:'Trust letterhead',tags:['trust'],pg:'Letter',pl:'Every page',docs:3,c:'11 Sep 2026, 1:15 PM',u:'11 Sep 2026, 1:15 PM',col:'#b91c1c'}],
+ paper:[{n:'NIOS practical exam',tags:['nios','practical'],pg:'A4',pl:'First page',docs:28,c:'8 Oct 2026, 2:59 PM',u:'9 Oct 2026, 8:20 AM',col:'#7030a0'},{n:'Unit test format',tags:['school'],pg:'A4',pl:'First page',docs:11,c:'1 Oct 2026, 10:00 AM',u:'1 Oct 2026, 10:00 AM',col:'#0a0a0a'},{n:'Half-yearly format',tags:['school','exam'],pg:'A4',pl:'Every page',docs:2,c:'15 Sep 2026, 3:30 PM',u:'15 Sep 2026, 3:30 PM',col:'#1d4ed8'}]};
+const DOCS={
+ letter:[['Annual day notice','School letterhead','9 Oct 2026, 10:12 AM'],['Fee reminder – Class IX','Fee circular','8 Oct 2026, 4:40 PM'],['Holiday circular','Principal’s notice','7 Oct 2026, 12:05 PM'],['Parent meeting invite','School letterhead','6 Oct 2026, 9:30 AM'],['Bonafide – A. Rane','School letterhead','5 Oct 2026, 5:10 PM'],['Trust AGM notice','Trust letterhead','2 Oct 2026, 11:00 AM']],
+ paper:[['247 Maths','NIOS practical exam','9 Oct 2026, 8:20 AM'],['212 Science','NIOS practical exam','8 Oct 2026, 6:45 PM'],['Class IX Unit Test 1','Unit test format','4 Oct 2026, 2:10 PM'],['Class X Half-yearly – English','Half-yearly format','29 Sep 2026, 10:25 AM']]};
+const TOOL={letter:{page:'letters',title:'Letter<span class="accent">heads</span>',sub:'Design a letterhead once, then write letters and notices on it.',design:'letterhead',designs:'Letterheads',docs:'Letters',doc:'letter',icon:'bi-envelope-paper',make:'Write a letter',newBtn:'New letterhead'},
+ paper:{page:'papers',title:'Exam <span class="accent">papers</span>',sub:'Set up a paper format once, then make question papers from it.',design:'paper format',designs:'Paper formats',docs:'Exam papers',doc:'exam paper',icon:'bi-journal-text',make:'Make a paper',newBtn:'New paper format'}};
+const PAGES={dashboard:['','Home'],templates:['Question bank','Templates'],'tpl-edit':['Templates','New template'],qsets:['Question bank','Question sets'],'qset-new':['Question sets','New question set'],qeditor:['Question sets','CTET Mocktest 2026'],import:['CTET Mocktest 2026','Import questions'],letters:['Documents','Letterheads'],papers:['Documents','Exam papers'],builder:['Documents','Design'],doc:['Documents','Document'],backup:['Workspace','Backup & restore']};
+const NAV={dashboard:'dashboard',templates:'templates','tpl-edit':'templates',qsets:'qsets','qset-new':'qsets',qeditor:'qsets',import:'qsets',letters:'letters',papers:'papers',backup:'backup'};
+
+/* ═════════ Helpers ═════════ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const splitBtn=(compact)=>`<div class="split${compact?' compact':''}"><button class="btn btn-primary" data-toast="Downloaded 247 Maths.docx" title="Download .docx" aria-label="Download .docx"><i class="bi bi-download"></i>${compact?'':' Download .docx'}</button><button class="btn btn-primary split-caret" data-dd aria-haspopup="menu" aria-expanded="false" aria-label="More download formats"><i class="bi bi-chevron-down xs"></i></button><div class="menu" role="menu"><button role="menuitem" data-toast="Downloaded 247 Maths.docx"><i class="bi bi-file-earmark-word"></i><span><b>Word document (.docx)</b><small>Downloads straight away, editable</small></span></button><button role="menuitem" data-toast="Downloaded 247 Maths.pdf"><i class="bi bi-file-earmark-pdf"></i><span><b>PDF</b><small>Downloads straight away, ready to share</small></span></button></div></div>`;
+const kebab=(extra='')=>`<div class="dd"><button class="btn btn-ghost btn-sm btn-icon" data-dd aria-haspopup="menu" aria-expanded="false" aria-label="More actions"><i class="bi bi-three-dots"></i></button><div class="menu" role="menu">${extra}<button role="menuitem" data-toast="Renamed"><i class="bi bi-pencil"></i><span><b>Rename</b></span></button><button role="menuitem" data-toast="Duplicated"><i class="bi bi-copy"></i><span><b>Duplicate</b></span></button><hr><button role="menuitem" class="danger" data-open="m-del"><i class="bi bi-trash3"></i><span><b>Delete</b></span></button></div></div>`;
+const mini=(c)=>`<div class="mini"><div class="mh"><span class="lg" style="background:${c}"></span><div class="tt"><b style="background:${c}"></b><i></i><i></i></div></div><hr style="border-color:#f97316"><div class="ln"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>`;
+function toast(m){const t=document.createElement('div');t.className='toast';t.innerHTML='<i class="bi bi-check-circle-fill" style="color:#4ade80"></i>'+m;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),2600)}
+
+/* ═════════ Renderers ═════════ */
+function renderRecent(){const it=[['bi-collection','CTET Mocktest 2026','Question set · 150 questions','Edited 2 h ago','qeditor'],['bi-journal-text','247 Maths','Exam paper · NIOS practical exam','Edited today','doc','paper'],['bi-envelope-paper','Annual day notice','Letter · School letterhead','Edited today','doc','letter'],['bi-collection','Class X Unit Test 1','Question set · 25 questions','Yesterday','qeditor']];
+ $('#recent').innerHTML=it.map(i=>`<li><span class="ico"><i class="bi ${i[0]}"></i></span><div class="grow"><b>${i[1]}</b><div class="small muted">${i[2]}</div></div><span class="small muted hide-sm">${i[3]}</span><button class="btn btn-sm" data-go="${i[4]}" ${i[5]?`data-kind="${i[5]}"`:''}>Open</button></li>`).join('')}
+function renderTemplates(){$('#tpl-grid').innerHTML=TEMPLATES.map(t=>`<article class="card design"><div class="body"><div class="row" style="flex-wrap:nowrap"><span class="ico"><i class="bi bi-grid-3x3-gap"></i></span><h3 class="grow" style="font-size:16px">${t.n}</h3>${kebab()}</div><div class="row" style="gap:6px">${t.tags.map(x=>`<span class="badge">${x}</span>`).join('')}</div><p class="small muted"><i class="bi bi-list-ol"></i> ${t.q} questions · ${t.b} subject block${t.b>1?'s':''}</p><div class="row"><button class="btn btn-primary btn-sm" data-go="qset-new"><i class="bi bi-file-earmark-plus"></i>Create question set</button><button class="btn btn-sm" data-go="tpl-edit">Edit</button></div></div><div class="meta"><span><i class="bi bi-pencil"></i> Updated ${t.u}</span></div></article>`).join('');
+ $('#tpl-pick').innerHTML=TEMPLATES.slice(0,4).map((t,i)=>`<button class="tile${i==0?' sel':''}" data-pick><span class="ico"><i class="bi bi-grid-3x3-gap"></i></span><span><b>${t.n}</b><span>${t.q} questions · ${t.b} blocks</span></span></button>`).join('')}
+function renderQsets(){$('#qset-rows').innerHTML=QSETS.map(s=>`<tr><td><div class="titlecell"><b>${s.n}</b><span>${s.t}</span></div></td><td>${s.q}</td><td>${s.s=='ok'?'<span class="badge ok"><i class="bi bi-check2"></i>Ready</span>':'<span class="badge err"><i class="bi bi-exclamation-triangle"></i>2 issues</span>'}</td><td class="muted">${s.e}</td><td><div class="actions"><button class="btn btn-sm" data-go="qeditor"><i class="bi bi-pencil-square"></i>Open</button>${s.s=='ok'?splitBtn(true):'<button class="btn btn-sm btn-icon" disabled title="Fix issues before exporting" aria-label="Download unavailable"><i class="bi bi-download"></i></button>'}${kebab()}</div></td></tr>`).join('')}
+function renderTool(kind){const T=TOOL[kind];const root=$('#p-'+T.page);
+ root.innerHTML=`<div class="page-head"><div><h1>${T.title}</h1><p>${T.sub}</p></div><div class="row right"><button class="btn" data-go="backup"><i class="bi bi-shield-check"></i>Backup &amp; restore</button><button class="btn btn-primary" data-new="${kind}"><i class="bi bi-plus-lg"></i>${T.newBtn}</button></div></div>
+ <div class="tabs" role="tablist" data-tabs="t-${kind}"><button role="tab" aria-selected="true" data-tab="d-${kind}">${T.designs}<span class="tcount">${DESIGNS[kind].length}</span></button><button role="tab" aria-selected="false" data-tab="x-${kind}">${T.docs}<span class="tcount">${DOCS[kind].length*8}</span></button></div>
+ <div class="panel" data-panel="d-${kind}" data-group="t-${kind}"><div class="toolbar"><div class="input-affix"><i class="bi bi-search"></i><input type="search" placeholder="Search ${T.designs.toLowerCase()}…" data-filter="#g-${kind}" aria-label="Search"></div><select aria-label="Filter by tag"><option>All tags</option>${[...new Set(DESIGNS[kind].flatMap(d=>d.tags))].map(t=>`<option>${t}</option>`).join('')}</select><select aria-label="Sort"><option>Recently edited</option><option>Newest first</option><option>Name A–Z</option></select></div>
+ <div class="grid3" id="g-${kind}">${DESIGNS[kind].map(d=>`<article class="card design"><div class="thumb" data-edit="${kind}" role="button" tabindex="0" aria-label="Edit ${d.n}">${mini(d.col)}</div><div class="body"><div class="row" style="flex-wrap:nowrap"><h3 class="grow" style="font-size:16px">${d.n}</h3>${kebab()}</div><div class="row" style="gap:6px"><span class="badge">${d.pg}</span><span class="badge">${d.pl}</span><span class="badge orange">${d.docs} ${T.docs.toLowerCase()}</span></div><div class="row" style="gap:6px">${d.tags.map(x=>`<button class="chip" style="padding:1px 9px;font-size:12px">${x}</button>`).join('')}</div><div class="row"><button class="btn btn-dark btn-sm grow" data-go="doc" data-kind="${kind}"><i class="bi bi-file-earmark-plus"></i>${T.make}</button><button class="btn btn-sm" data-edit="${kind}">Edit</button></div></div><div class="meta"><span title="Created"><i class="bi bi-calendar-plus"></i> ${d.c}</span><span title="Last edited"><i class="bi bi-pencil"></i> ${d.u}</span></div></article>`).join('')}</div></div>
+ <div class="panel" data-panel="x-${kind}" data-group="t-${kind}" hidden><div class="toolbar"><div class="input-affix"><i class="bi bi-search"></i><input type="search" placeholder="Search ${T.docs.toLowerCase()} by name…" data-filter="#r-${kind}" aria-label="Search"></div><select aria-label="Filter by design"><option>All ${T.designs.toLowerCase()}</option>${DESIGNS[kind].map(d=>`<option>${d.n}</option>`).join('')}</select><span class="muted small right">${DOCS[kind].length*8} total</span></div>
+ <div class="card tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th>${T.design[0].toUpperCase()+T.design.slice(1)}</th><th>Edited</th><th style="text-align:right">Actions</th></tr></thead><tbody id="r-${kind}">${DOCS[kind].map(r=>`<tr><td><b>${r[0]}</b></td><td class="muted">${r[1]}</td><td class="muted">${r[2]}</td><td><div class="actions"><button class="btn btn-sm" data-go="doc" data-kind="${kind}"><i class="bi bi-pencil-square"></i>Open</button>${splitBtn(true)}${kebab()}</div></td></tr>`).join('')}</tbody></table></div><div style="text-align:center;margin-top:16px"><button class="btn">Show more</button></div></div>`}
+function renderQ(){ $('#qlist').innerHTML=Array.from({length:12},(_,i)=>{const n=i+1,bad=n==3||n==7;return `<button class="qitem" ${n==3?'aria-current="true"':''}><span class="n">${n}</span><span class="t grow">${['What is the sum of the angles of a triangle?','Which number is prime?','Choose the odd one out','Simplify 3/4 + 1/8','Area of a rectangle with sides 6 and 4','A fraction equal to 0.5','Convert 2.5 m to cm','Find the median of 3, 5, 9','Perimeter of a square of side 7','Next in the series 2, 4, 8, ?','HCF of 12 and 18','Value of 2³'][i]}</span>${bad?'<span class="dot" title="Needs attention"></span>':''}</button>`}).join('');
+ $('#opts').innerHTML=['90°','180°','270°','360°'].map((o,i)=>`<div class="opt"><input type="radio" class="radio" name="ans" ${i==1?'checked':''} aria-label="Correct answer ${i+1}"><div class="rte"><div class="rte-body" contenteditable="true" style="min-height:44px;padding:9px 12px">${o}</div></div><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove option"><i class="bi bi-x-lg"></i></button></div>`).join('');
+ const cols=['#','Subject','Topic','Type','Question','Opt 1','Opt 2','Opt 3','Opt 4','Answer','Marks','Neg','Difficulty'];const rows=Array.from({length:8},(_,i)=>[i+1,'Mathematics','Geometry','Single','Sum of the angles of a triangle?','90°','180°','270°','360°',i==2?'':'2','1',i==6?'−4':'−0.25','Medium']);
+ $('#gridwrap').innerHTML=`<table class="grid-sheet"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((c,j)=>`<td class="${j==1||j==10||j==11?'lock':''}${(j==9&&c==='')||(j==11&&c==='−4')?' bad':''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+ $$('[data-rte]').forEach(b=>b.innerHTML=['type-bold','type-italic','type-underline','|','list-ul','list-ol','|','text-left','text-center','justify','|','table','image','palette'].map(i=>i=='|'?'<span class="sep"></span>':`<button type="button" aria-label="${i}"><i class="bi bi-${i}"></i></button>`).join(''))}
+function renderDocQ(){$('#dq').innerHTML=[['To verify the identity a³-b³ = (a-b)(a²+ab+b²)','2'],['To find the total surface area of a cube (side = 6 cm)','2'],['हिंदी प्रश्न: त्रिभुज के कोणों का योग ज्ञात कीजिए','2']].map((q,i)=>`<div class="opt" style="grid-template-columns:auto 1fr 90px auto"><b style="padding-top:9px">Q${i+1}</b><textarea style="min-height:44px" aria-label="Question ${i+1}">${q[0]}</textarea><div class="row" style="flex-wrap:nowrap;gap:4px"><input type="text" value="${q[1]}" style="text-align:right" aria-label="Marks"><span class="muted">M</span></div><button class="btn btn-ghost btn-sm btn-icon" aria-label="Remove"><i class="bi bi-trash3"></i></button></div>`).join('')+'<div class="row"><button class="btn btn-sm"><i class="bi bi-plus-lg"></i>Add question</button><span class="muted small">Paste or drop an image into any question</span></div>'}
+function renderBackup(){const c=[['bi-collection','Question bank','Templates and question sets','6 templates · 5 question sets','2.1 MB','3 days ago'],['bi-envelope-paper','Letterheads','Letterheads and letters','4 designs · 128 letters','5.4 MB','Never'],['bi-journal-text','Exam papers','Paper formats and papers','3 formats · 41 papers','3.8 MB','Never'],['bi-box-seam','Everything','All of the above, one file','Full workspace','11.3 MB','3 days ago']];
+ $('#bk').innerHTML=c.map(x=>`<div class="card card-pad stack"><div class="row" style="flex-wrap:nowrap"><span class="ico"><i class="bi ${x[0]}"></i></span><div class="grow"><h3 style="font-size:16px">${x[1]}</h3><p class="small muted">${x[2]}</p></div></div><div class="small muted">${x[3]} · ${x[4]}<br>Last backup: <b style="color:var(--text)">${x[5]}</b></div><div class="row"><button class="btn btn-dark" data-toast="Backup downloaded"><i class="bi bi-box-arrow-down"></i>Back up</button><button class="btn" data-toast="Choose a backup file to restore"><i class="bi bi-box-arrow-in-up"></i>Restore…</button></div></div>`).join('')}
+function sheet(el,full){const letter=document.body.dataset.kind=='letter';const d=full;
+ el.innerHTML=letter?`<div class="hdr"><span class="lg"></span><div><div class="org" style="color:${el._c||'#7030a0'};text-align:left;font-size:1.6em">${el._n||'School Name'}</div><div class="sub" style="font-weight:400;font-size:.9em">Street address, City – 400001 · Phone 00000 00000</div></div></div><hr><div class="kv"><span>Ref. No.: <b>${d?'SCH/2026/114':'<span class="ph">ref. no.</span>'}</b></span><span>Date: <b>09/10/2026</b></span></div>${d?'<p>Dear Parents,</p><p style="margin-top:.6em">This is to inform you that the <b>annual day</b> will be held on <span style="color:#c2410c">12 December</span>.</p><ul><li>Reporting time: 9:00 AM</li><li>Dress code: school uniform</li></ul>':'<p><span class="ph">Your letter text appears here</span></p>'}`
+ :`<div class="org" style="color:#7030a0">${el._n||'Your School Name'}</div><div class="sub" style="font-size:1.4em">Center: 110126</div><div class="sub">Practical Exam (Secondary) – SEP 2026</div><hr style="border-top-color:#000"><div class="kv"><span>Subject: <b>${d?'Maths':'<span class="ph">subject</span>'}</b></span><span>Subject Code: <b>${d?'247':'<span class="ph">code</span>'}</b></span></div><div class="kv"><span>Time: <b>10:30 AM to 01:00 PM</b></span><span>Date: <b>09/10/2026</b></span></div><b>Instructions -</b><ul><li>Attempt any two from the given questions.</li><li><b>Maximum Marks: 7.5</b></li></ul><hr style="border-top-color:#000"><div class="q"><span><b>(Q1)</b> To verify the identity a³-b³</span><span>(2 M)</span></div><div class="q"><span><b>(Q2)</b> Total surface area of a cube</span><span>(2 M)</span></div><div class="q"><b>Viva</b><span>(1.5 M)</span></div>`}
+
+/* ═════════ Router ═════════ */
+let current='dashboard',prev='dashboard';
+function go(page,opts={}){if(opts.kind)document.body.dataset.kind=opts.kind;
+ if(page!==current)prev=current;current=page;
+ $$('.page').forEach(p=>p.hidden=true);const el=$('#p-'+page);if(!el)return;el.hidden=false;
+ const kind=document.body.dataset.kind;let [par,title]=PAGES[page]||['',page];
+ if(page==='builder'){title=kind=='letter'?'Letterhead design':'Paper format design';par=kind=='letter'?'Letterheads':'Exam papers';$('#b-title').textContent=kind=='letter'?'Edit letterhead':'Edit paper format';sheet($('#sheet-b'),false)}
+ if(page==='doc'){title=kind=='letter'?'Write a letter':'Make a paper';par=kind=='letter'?'Letterheads':'Exam papers';$('#d-title').textContent=title;$('#d-design').textContent=kind=='letter'?'School letterhead':'NIOS practical exam';$('#d-fname').textContent=kind=='letter'?'Annual day notice':'247 Maths';sheet($('#sheet-d'),true)}
+ $('#crumb-parent').textContent=par;$('#crumb-sep').style.display=par?'':'none';$('#crumb-title').textContent=title;document.title=title+' · PaperForge (demo)';
+ const nav=NAV[page]||(page==='builder'||page==='doc'?(kind=='letter'?'letters':'papers'):'');
+ $$('.nav-item[data-go]').forEach(b=>b.getAttribute('data-go')===nav?b.setAttribute('aria-current','page'):b.removeAttribute('aria-current'));
+ document.body.classList.remove('drawer');$('#scrim').hidden=true;closeAll();window.scrollTo(0,0);if(location.hash!=='#'+page)history.replaceState(null,'','#'+page)}
+function closeAll(){$$('.open').forEach(e=>e.classList.remove('open'));$$('[data-dd]').forEach(b=>b.setAttribute('aria-expanded','false'))}
+function openModal(id){closeAll();const m=$('#'+id);m.classList.add('open');const f=$('input,button',m);setTimeout(()=>f&&f.focus(),20);if(id=='m-cmd')renderCmd('')}
+function closeModals(){$$('.modal-back.open').forEach(m=>m.classList.remove('open'))}
+function newDesign(kind){const T=TOOL[kind];$('#m-new-t').textContent=T.newBtn;$('#m-new-body').innerHTML='<p class="muted small">Pick a starting point. You can change everything afterwards.</p>'+(kind=='letter'?[['Official letter','Logo beside the name, address line, divider and a free-text body.'],['Blank letterhead','Start from nothing and add your own elements.']]:[['Exam paper','School name, exam title, details table, instructions and questions.'],['Blank paper format','Start from nothing and add your own elements.']]).map(p=>`<button class="tile" data-go="builder" data-kind="${kind}"><span class="ico"><i class="bi ${T.icon}"></i></span><span><b>${p[0]}</b><span>${p[1]}</span></span></button>`).join('');openModal('m-new')}
+const CMDS=[['Go to','bi-house-door','Home','dashboard'],['Go to','bi-grid-3x3-gap','Templates','templates'],['Go to','bi-collection','Question sets','qsets'],['Go to','bi-envelope-paper','Letterheads','letters'],['Go to','bi-journal-text','Exam papers','papers'],['Go to','bi-shield-check','Backup & restore','backup'],['Create','bi-plus-lg','New question set','qset-new'],['Create','bi-plus-lg','New template','tpl-edit'],['Open','bi-collection','CTET Mocktest 2026','qeditor'],['Open','bi-journal-text','247 Maths (exam paper)','doc','paper'],['Open','bi-envelope-paper','Annual day notice (letter)','doc','letter']];
+function renderCmd(q){q=q.toLowerCase();let g='';$('#cmd-list').innerHTML=CMDS.filter(c=>c[2].toLowerCase().includes(q)).map(c=>{const h=c[0]!==g?`<div class="grp">${c[0]}</div>`:'';g=c[0];return h+`<button data-go="${c[3]}" ${c[4]?`data-kind="${c[4]}"`:''}><i class="bi ${c[1]} accent"></i>${c[2]}</button>`}).join('')||'<p class="muted" style="padding:16px">No matches.</p>'}
+
+/* ═════════ Events ═════════ */
+document.addEventListener('click',e=>{const t=e.target;
+ const dd=t.closest('[data-dd]');if(dd){const host=dd.closest('.dd,.split');const was=host.classList.contains('open');closeAll();if(!was){host.classList.add('open');dd.setAttribute('aria-expanded','true');const m=$('.menu',host);m.classList.remove('up');const r=m.getBoundingClientRect();if(r.bottom>innerHeight-8)m.classList.add('up')}return}
+ if(!t.closest('.menu')&&!t.closest('.modal'))closeAll();
+ const nw=t.closest('[data-new]');if(nw){newDesign(nw.dataset.new);return}
+ const ed=t.closest('[data-edit]');if(ed){go('builder',{kind:ed.dataset.edit});return}
+ if(t.closest('[data-back]')){go(prev&&prev!=='builder'&&prev!=='doc'?prev:(document.body.dataset.kind=='letter'?'letters':'papers'));return}
+ const tg=t.closest('[data-toast]');if(tg)toast(tg.dataset.toast);
+ const g=t.closest('[data-go]');if(g){closeModals();go(g.dataset.go,{kind:g.dataset.kind});return}
+ const op=t.closest('[data-open]');if(op){openModal(op.dataset.open);return}
+ if(t.closest('[data-close]')||t.classList.contains('modal-back')){closeModals();return}
+ const tab=t.closest('[data-tab]');if(tab){const grp=tab.parentElement.dataset.tabs;$$('[data-tab]',tab.parentElement).forEach(b=>b.setAttribute('aria-selected',b===tab));$$(`[data-group="${grp}"]`).forEach(p=>p.hidden=p.dataset.panel!==tab.dataset.tab);return}
+ const sg=t.closest('[data-seg]');if(sg){$$('[data-seg]',sg.parentElement).forEach(b=>b.setAttribute('aria-pressed',b===sg));return}
+ const vw=t.closest('[data-view]');if(vw){$$('[data-view]',vw.parentElement).forEach(b=>b.setAttribute('aria-pressed',b===vw));const gr=$(vw.dataset.target);gr.className=vw.dataset.view=='list'?'stack':'grid3';return}
+ const ch=t.closest('[data-chip]');if(ch){$$('[data-chip]',ch.parentElement).forEach(b=>b.setAttribute('aria-pressed',b===ch));return}
+ const pk=t.closest('[data-pick]');if(pk){$$('[data-pick]').forEach(b=>b.classList.toggle('sel',b===pk));return}
+ const tt=t.closest('[data-toggle]');if(tt){const el=$(tt.dataset.toggle);el.hidden=!el.hidden;return}
+ const am=t.closest('[data-ampm]');if(am){am.textContent=am.textContent=='AM'?'PM':'AM';return}
+ const sw=t.closest('.swatch');if(sw){$$('.swatch',sw.parentElement).forEach(b=>b.setAttribute('aria-pressed',b===sw));const c=getComputedStyle(sw).backgroundColor;$('#sheet-b').querySelectorAll('.org').forEach(o=>o.style.color=c);return}
+ if(t.closest('#burger')){document.body.classList.add('drawer');$('#scrim').hidden=false;return}
+ if(t.id==='scrim'){document.body.classList.remove('drawer');$('#scrim').hidden=true;return}
+ if(t.closest('#theme')){const d=document.documentElement;const dark=d.dataset.theme=='dark';d.dataset.theme=dark?'light':'dark';$('#theme i').className='bi bi-'+(dark?'moon':'sun')}
+});
+document.addEventListener('input',e=>{const t=e.target;
+ if(t.dataset.filter){const q=t.value.toLowerCase();$$(t.dataset.filter+' > *').forEach(c=>c.style.display=c.textContent.toLowerCase().includes(q)?'':'none')}
+ if(t.id=='cmd-q')renderCmd(t.value);
+ if(t.id=='b-name'){const s=$('#sheet-b');s._n=t.value;sheet(s,false)}
+ if(t.id=='c-title'){$('#sheet-b').querySelectorAll('.org').forEach(o=>o.style.color=t.value)}
+ if(t.id=='d-subj'||t.id=='d-code'){$('#d-fname').textContent=($('#d-code').value+' '+$('#d-subj').value).trim()||'Document'}});
+document.addEventListener('keydown',e=>{
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()=='k'){e.preventDefault();openModal('m-cmd')}
+ else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()=='s'){e.preventDefault();toast('Saved')}
+ else if(e.key=='Escape'){closeModals();closeAll()}
+ else if(e.key=='?'&&!/INPUT|TEXTAREA/.test(e.target.tagName)&&!e.target.isContentEditable){openModal('m-help')}
+ else if((e.key=='Enter'||e.key==' ')&&e.target.matches('.thumb[role=button]')){e.preventDefault();e.target.click()}});
+$$('[data-split]').forEach(s=>s.outerHTML=splitBtn(false));
+renderRecent();renderTemplates();renderQsets();renderTool('letter');renderTool('paper');renderQ();renderDocQ();renderBackup();
+go((location.hash||'#dashboard').slice(1)in PAGES?(location.hash||'#dashboard').slice(1):'dashboard');
+</script>
+</body>
+</html>
