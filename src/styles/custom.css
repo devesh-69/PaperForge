@@ -244,9 +244,8 @@ kbd {
 .btn-primary:active, .btn-dark:active { transform: translateY(0); }
 
 .btn-orange {
-  /* --orange-dark, not --orange: white on #f97316 fails WCAG AA contrast (2.8:1) */
-  background: var(--orange-dark) !important;
-  border-color: var(--orange-dark) !important;
+  background: var(--orange) !important;
+  border-color: var(--orange) !important;
   color: var(--white) !important;
   font-weight: 600;
   border-radius: var(--radius);
@@ -256,8 +255,8 @@ kbd {
   display: inline-flex; align-items: center; gap: 0.4rem;
 }
 .btn-orange:hover {
-  background: #9a3412 !important;
-  border-color: #9a3412 !important;
+  background: var(--orange-dark) !important;
+  border-color: var(--orange-dark) !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(249,115,22,.3);
 }
