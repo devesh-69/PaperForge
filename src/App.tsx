@@ -33,6 +33,15 @@ const LetterheadBuilderPage = page(() => import('./pages/LetterheadBuilderRoute'
 const ExamPaperBuilderPage = page(() => import('./pages/LetterheadBuilderRoute'), 'ExamPaperBuilderPage');
 const PaperEditorPage = page(() => import('./pages/PaperEditorPage'), 'PaperEditorPage');
 
+// Returning visitors who open the bare address go straight to their Home. Only the page the
+// tab was opened on can redirect, so links back to the landing page from inside the app work.
+let landingRedirectArmed = typeof window !== 'undefined' && window.location.pathname === '/';
+const landingLoader = () => {
+  const go = landingRedirectArmed && hasVisited();
+  landingRedirectArmed = false;
+  return go ? redirect(APP_HOME) : null;
+};
+
 const route = (path: string, element: React.ReactNode, handle: RouteHandle): RouteObject => ({ path, element, handle });
 
 const BANK = { label: 'Question bank', to: '/templates' };
@@ -50,8 +59,7 @@ const router = createBrowserRouter([
       ...PUBLIC_PAGES.map<RouteObject>((page) => ({
         path: page.path,
         element: <PublicRoute page={page} />,
-        // returning visitors skip the landing page and go straight to their Home
-        loader: page.path === '/' ? () => (hasVisited() ? redirect(APP_HOME) : null) : undefined,
+        loader: page.path === '/' ? landingLoader : undefined,
       })),
       { path: '*', element: <NotFoundPage /> },
     ],

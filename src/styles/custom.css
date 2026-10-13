@@ -9,6 +9,20 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "bootstrap-icons/font/bootstrap-icons.css";
 
+/* Local fallback sized to Inter's metrics, so text does not reflow (layout shift) when the
+   web font finishes loading. Liberation Sans is metric-compatible with Arial. */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 107.06%;
+  ascent-override: 90.49%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+}
+
+/* Icon glyphs are 1em square; fix the box so it does not change size when the icon font loads */
+.bi::before { width: 1em; }
+
 /* ── Design Tokens ─────────────────────────────────────────────── */
 :root {
   --orange:        #f97316;
@@ -41,7 +55,7 @@
 *,*::before,*::after { box-sizing: border-box; }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Inter', 'Inter Fallback', system-ui, -apple-system, sans-serif;
   background: var(--white);
   color: var(--gray-900);
   min-height: 100vh;
@@ -230,8 +244,9 @@ kbd {
 .btn-primary:active, .btn-dark:active { transform: translateY(0); }
 
 .btn-orange {
-  background: var(--orange) !important;
-  border-color: var(--orange) !important;
+  /* --orange-dark, not --orange: white on #f97316 fails WCAG AA contrast (2.8:1) */
+  background: var(--orange-dark) !important;
+  border-color: var(--orange-dark) !important;
   color: var(--white) !important;
   font-weight: 600;
   border-radius: var(--radius);
@@ -241,8 +256,8 @@ kbd {
   display: inline-flex; align-items: center; gap: 0.4rem;
 }
 .btn-orange:hover {
-  background: var(--orange-dark) !important;
-  border-color: var(--orange-dark) !important;
+  background: #9a3412 !important;
+  border-color: #9a3412 !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(249,115,22,.3);
 }
@@ -448,6 +463,8 @@ kbd {
   color: var(--gray-500);
   text-align: center;
 }
+.app-footer .footer-link { color: var(--gray-700); text-decoration: underline; text-underline-offset: 2px; }
+.app-footer .footer-link:hover { color: var(--orange-dark); }
 
 /* ── Utilities ─────────────────────────────────────────────────── */
 .text-orange { color: var(--orange) !important; }

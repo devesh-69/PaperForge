@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const LINKS = [
   { href: 'https://github.com/devesh-69', title: 'GitHub', icon: 'bi-github' },
@@ -9,7 +10,10 @@ const LINKS = [
 export const Footer: React.FC = () => (
   <footer className="app-footer">
     <div className="container d-flex justify-content-between align-items-center">
-      <div>PaperForge v0.1.0 &nbsp;·&nbsp; Browser-only, Storage by IndexedDB</div>
+      <div>
+        PaperForge v0.1.0 &nbsp;·&nbsp; Browser-only, Storage by IndexedDB &nbsp;·&nbsp;{' '}
+        <Link className="footer-link" to="/">About PaperForge</Link> &nbsp;·&nbsp; <Link className="footer-link" to="/privacy">Privacy</Link>
+      </div>
       <div className="d-flex align-items-center gap-3">
         <span className="text-muted">Created by Devesh Tatkare</span>
         <div className="footer-social">
