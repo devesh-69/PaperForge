@@ -22,7 +22,7 @@ export const Sidebar: React.FC<Props> = ({ section, open, onNavigate, onShowShor
 
   return (
     <aside className={`shell-sidebar ${open ? 'is-open' : ''}`} id="app-sidebar" aria-label="Main navigation">
-      <Link className="side-brand" to="/home" onClick={onNavigate} aria-label="PaperForge home">
+      <Link className="side-brand" to="/" onClick={onNavigate} aria-label="PaperForge website">
         <img src="/paperforge-64x64.ico" alt="" width="26" height="26" />
         <span className="side-text">PaperForge</span>
       </Link>
