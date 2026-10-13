@@ -1,6 +1,5 @@
 import React, { lazy } from 'react';
 import { createBrowserRouter, redirect, RouterProvider, type RouteObject } from 'react-router-dom';
-import { AppShell } from './components/layout/AppShell';
 import { PublicRouteLayout } from './components/public/PublicRouteLayout';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { PublicRoute } from './pages/PublicRoute';
@@ -58,8 +57,10 @@ const router = createBrowserRouter([
     ],
   },
   // The app (private working screens)
+  // The shell (and the database layer it pulls in) is loaded on demand, so the public pages
+  // do not download it.
   {
-    element: <AppShell />,
+    lazy: async () => ({ Component: (await import('./components/layout/AppShell')).AppShell }),
     children: [
       route(APP_HOME, <HomePage />, { title: 'Home', section: 'home' }),
 
