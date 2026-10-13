@@ -13,7 +13,8 @@ export interface HeadData {
   jsonLd: object[];
 }
 
-const OG_IMAGE_PATH = '/paperforge-1024x1024.webp';
+const OG_IMAGE_PATH = '/og-image.png';
+const OG_IMAGE_ALT = 'PaperForge: question paper, letterhead and exam paper maker';
 
 function webApplication(page: PublicPage): object {
   const url = absoluteUrl(page.path);
@@ -75,7 +76,13 @@ export function buildHead(page: PublicPage): HeadData {
     tags.push({ tag: 'link', attrs: { rel: 'canonical', href: url } }, { tag: 'meta', attrs: { property: 'og:url', content: url } });
   }
   if (image) {
-    tags.push({ tag: 'meta', attrs: { property: 'og:image', content: image } }, { tag: 'meta', attrs: { name: 'twitter:image', content: image } });
+    tags.push(
+      { tag: 'meta', attrs: { property: 'og:image', content: image } },
+      { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' } },
+      { tag: 'meta', attrs: { property: 'og:image:height', content: '630' } },
+      { tag: 'meta', attrs: { property: 'og:image:alt', content: OG_IMAGE_ALT } },
+      { tag: 'meta', attrs: { name: 'twitter:image', content: image } },
+    );
   }
   const jsonLd = [webApplication(page), breadcrumb(page), faqPage(page)].filter((x): x is object => x !== null);
   return { title: page.title, tags, jsonLd };
